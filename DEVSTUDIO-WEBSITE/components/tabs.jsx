@@ -1,7 +1,7 @@
-"use client";;
+"use client";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { cn } from "../src/lib/utils"
+import { cn } from "../src/lib/utils";
 
 export const Tabs = ({
   tabs: propTabs,
@@ -33,12 +33,13 @@ export const Tabs = ({
         {propTabs.map((tab, idx) => (
           <button
             key={tab.title}
-            onClick={() => {
-              moveSelectedTabToTop(idx);
-            }}
+            onClick={() => moveSelectedTabToTop(idx)}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
-            className={cn("relative px-4 py-2 rounded-full", tabClassName)}
+            className={cn(
+              "relative px-4 py-2 rounded-full transition-colors duration-300",
+              tabClassName
+            )}
             style={{
               transformStyle: "preserve-3d",
             }}>
@@ -47,23 +48,26 @@ export const Tabs = ({
                 layoutId="clickedbutton"
                 transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
                 className={cn(
-                  "absolute inset-0 bg-gray-200 dark:bg-zinc-800 rounded-full ",
+                  "absolute inset-0 bg-gray-200 dark:bg-zinc-800 rounded-full",
                   activeTabClassName
-                )} />
+                )}
+              />
             )}
 
-            <span className="relative block text-white dark:text-black">
+            <span className="relative block text-gray-900 dark:text-white font-medium">
               {tab.title}
             </span>
           </button>
         ))}
       </div>
+
       <FadeInDiv
         tabs={tabs}
         active={active}
         key={active.value}
         hovering={hovering}
-        className={cn("mt-32", contentClassName)} />
+        className={cn("mt-32", contentClassName)}
+      />
     </>
   );
 };
@@ -73,9 +77,8 @@ export const FadeInDiv = ({
   tabs,
   hovering
 }) => {
-  const isActive = (tab) => {
-    return tab.value === tabs[0].value;
-  };
+  const isActive = (tab) => tab.value === tabs[0].value;
+
   return (
     <div className="relative w-full h-full">
       {tabs.map((tab, idx) => (

@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider"
+import Footer from "../../components/footer"
 
 export default function RootLayout({ children }) {
   return (
@@ -11,7 +12,12 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="flex min-h-screen flex-col">
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>

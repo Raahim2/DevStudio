@@ -89,7 +89,7 @@ export const TextHoverEffect = ({ text, duration }) => {
         y="50%"
         textAnchor="middle"
         dominantBaseline="middle"
-        strokeWidth="0.3"
+        strokeWidth="0.6"
         className="fill-transparent font-[helvetica] text-7xl font-bold"
         stroke={strokeColor}
         style={{ opacity: hovered ? 0.7 : 0 }}
@@ -103,7 +103,7 @@ export const TextHoverEffect = ({ text, duration }) => {
         y="50%"
         textAnchor="middle"
         dominantBaseline="middle"
-        strokeWidth="0.3"
+        strokeWidth="0.6"
         className="fill-transparent font-[helvetica] text-7xl font-bold"
         stroke={strokeColor}
         initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
