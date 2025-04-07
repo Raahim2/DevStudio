@@ -1,5 +1,6 @@
 import os
 import argparse
+import sys
 
 def banner():
     return """
@@ -24,9 +25,6 @@ def push_dbs():
     pass 
 
 
-import argparse
-import sys
-
 def main():
     print(banner())
 
@@ -42,21 +40,21 @@ def main():
     )
 
     parser.add_argument(
-        "--folder",
+        "--url",
         help="Path to the repo to scan"
     )
 
     parser.add_argument(
-        "--api",
+        "--access_token",
         help="Your API key goes here"
     )
 
     parser.add_argument(
-        "--devtoken",
-        help="Needed for the app to send queries and update the database"
+        "--notification",
+        help="Your notification to push goes here"
     )
 
-    # Show help if no arguments are provided
+
     if len(sys.argv) == 1:
         parser.print_help()
         return
@@ -64,25 +62,25 @@ def main():
     args = parser.parse_args()
 
     if args.task == "scan_repo":
-        if not args.folder:
-            print("[❗ Error ] : --folder is required for scan_repo")
+        if not args.url:
+            print("[❗ Error ] : --url is required for scan_repo")
             return
-        if not args.api:
-            print("[❗ Error ] : --api is required for scan_repo")
+        if not args.access_token:
+            print("[❗ Error ] : --access_token is required for scan_repo")
             return
-        send_query(args.folder, args.api)
+        send_query(args.url, args.access_token)
 
     elif args.task == "push_dbs":
-        if not args.folder:
-            print("[❗ Error ] : --folder is required for push_dbs")
+        if not args.url:
+            print("[❗ Error ] : --url is required for push_dbs")
             return
-        if not args.api:
-            print("[❗ Error ] : --api is required for push_dbs")
+        if not args.access_token:
+            print("[❗ Error ] : --access_token is required for push_dbs")
             return
-        if not args.devtoken:
-            print("[❗ Error ] : --devtoken is required for push_dbs")
+        if not args.notification:
+            print("[❗ Error ] : --notification is required for push_dbs")
             return
-        push_dbs(args.folder, args.api, args.devtoken)
+        push_dbs(args.url, args.access_token , args.access_token)
 
 
 
