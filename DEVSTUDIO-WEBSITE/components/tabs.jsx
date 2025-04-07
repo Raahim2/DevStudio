@@ -1,7 +1,7 @@
 "use client";;
 import { useState } from "react";
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
+import { cn } from "../src/lib/utils"
 
 export const Tabs = ({
   tabs: propTabs,

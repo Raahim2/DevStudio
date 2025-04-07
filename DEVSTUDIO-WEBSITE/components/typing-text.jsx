@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "../src/lib/utils"
 import { motion, stagger, useAnimate, useInView } from "motion/react";
 import { useEffect } from "react";
 
@@ -43,7 +43,8 @@ export const TypingText = ({
                 <motion.span
                   initial={{}}
                   key={`char-${index}`}
-                  className={cn(`dark:text-white text-black opacity-0 hidden`, word.className)}>
+                  className={cn(`text-neutral-900 dark:text-neutral-100 opacity-0 hidden`, word.className)}
+                  >
                   {char}
                 </motion.span>
               ))}
@@ -101,7 +102,8 @@ export const TypewriterEffectSmooth = ({
               {word.text.map((char, index) => (
                 <span
                   key={`char-${index}`}
-                  className={cn(`dark:text-white text-black `, word.className)}>
+                  className={cn(`text-neutral-900 dark:text-neutral-100`, word.className)}
+                  >
                   {char}
                 </span>
               ))}
