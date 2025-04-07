@@ -1,20 +1,18 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
-import { motion } from "motion/react"; // Use motion/react import
+import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
 
-// No need for explicit FunctionComponent type in JS
-// Use prop-types package or JSDoc for prop validation if desired, but often omitted in simple cases
-export const TextHoverEffect = ({
-  text,
-  duration, // Optional duration prop
-}) => {
-  const svgRef = useRef(null); // Remove TypeScript generic
-  const [cursor, setCursor] = useState({ x: 0, y: 0 }); // Remove TypeScript generic
-  const [hovered, setHovered] = useState(false); // Remove TypeScript generic
-  const [maskPosition, setMaskPosition] = useState({ cx: "50%", cy: "50%" }); // Remove TypeScript generic
+export const TextHoverEffect = ({ text, duration }) => {
+  const svgRef = useRef(null);
+  const radialRef = useRef(null);
+  const [cursor, setCursor] = useState({ x: 0, y: 0 });
+  const [hovered, setHovered] = useState(false);
+  const [maskPosition, setMaskPosition] = useState({ cx: "50%", cy: "50%" });
+  const { theme } = useTheme();
 
+  // Update mask position on mouse move
   useEffect(() => {
-    // Type checking for current happens implicitly at runtime in JS
     if (svgRef.current && cursor.x !== null && cursor.y !== null) {
       const svgRect = svgRef.current.getBoundingClientRect();
       const cxPercentage = ((cursor.x - svgRect.left) / svgRect.width) * 100;
@@ -24,7 +22,18 @@ export const TextHoverEffect = ({
         cy: `${cyPercentage}%`,
       });
     }
-  }, [cursor]); // Dependency array remains the same
+  }, [cursor]);
+
+  // Manually set cx and cy on the radial gradient
+  useEffect(() => {
+    if (radialRef.current && hovered) {
+      radialRef.current.setAttribute("cx", maskPosition.cx);
+      radialRef.current.setAttribute("cy", maskPosition.cy);
+    }
+  }, [maskPosition, hovered]);
+
+  const strokeColor =
+    theme === "dark" ? "#e5e5e5" : theme === "light" ? "#222" : "#666";
 
   return (
     <svg
@@ -35,11 +44,10 @@ export const TextHoverEffect = ({
       xmlns="http://www.w3.org/2000/svg"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onMouseMove={(e) => setCursor({ x: e.clientX, y: e.clientY })} // Event type is inferred
+      onMouseMove={(e) => setCursor({ x: e.clientX, y: e.clientY })}
       className="select-none"
     >
       <defs>
-        {/* Gradient definition remains the same */}
         <linearGradient
           id="textGradient"
           gradientUnits="userSpaceOnUse"
@@ -58,65 +66,54 @@ export const TextHoverEffect = ({
           )}
         </linearGradient>
 
-        {/* motion.radialGradient remains the same */}
-        <motion.radialGradient
+        <radialGradient
           id="revealMask"
           gradientUnits="userSpaceOnUse"
           r="20%"
-          initial={{ cx: "50%", cy: "50%" }}
-          animate={maskPosition}
-          transition={{ duration: duration ?? 0, ease: "easeOut" }}
-          // Example for a smoother animation below (remains the same)
-          //   transition={{
-          //     type: "spring",
-          //     stiffness: 300,
-          //     damping: 50,
-          //   }}
+          cx="50%"
+          cy="50%"
+          ref={radialRef}
         >
           <stop offset="0%" stopColor="white" />
           <stop offset="100%" stopColor="black" />
-        </motion.radialGradient>
+        </radialGradient>
+
         <mask id="textMask">
-          <rect
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            fill="url(#revealMask)"
-          />
+          <rect x="0" y="0" width="100%" height="100%" fill="url(#revealMask)" />
         </mask>
       </defs>
-      {/* SVG Text elements remain the same */}
+
+      {/* Outline Text */}
       <text
         x="50%"
         y="50%"
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.3"
-        className="fill-transparent stroke-neutral-200 font-[helvetica] text-7xl font-bold dark:stroke-neutral-800"
+        className="fill-transparent font-[helvetica] text-7xl font-bold"
+        stroke={strokeColor}
         style={{ opacity: hovered ? 0.7 : 0 }}
       >
         {text}
       </text>
+
+      {/* Animated Stroke Text */}
       <motion.text
         x="50%"
         y="50%"
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.3"
-        className="fill-transparent stroke-neutral-200 font-[helvetica] text-7xl font-bold dark:stroke-neutral-800"
+        className="fill-transparent font-[helvetica] text-7xl font-bold"
+        stroke={strokeColor}
         initial={{ strokeDashoffset: 1000, strokeDasharray: 1000 }}
-        animate={{
-          strokeDashoffset: 0,
-          strokeDasharray: 1000,
-        }}
-        transition={{
-          duration: 4,
-          ease: "easeInOut",
-        }}
+        animate={{ strokeDashoffset: 0, strokeDasharray: 1000 }}
+        transition={{ duration: 4, ease: "easeInOut" }}
       >
         {text}
       </motion.text>
+
+      {/* Gradient Text with Reveal Mask */}
       <text
         x="50%"
         y="50%"

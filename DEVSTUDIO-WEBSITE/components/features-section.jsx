@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { cn } from "../src/lib/utils"
 import React from "react";
 import { BentoGrid , BentoGridItem } from "./bento-grid";
 import {

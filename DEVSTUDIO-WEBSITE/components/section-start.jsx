@@ -5,28 +5,31 @@ import { Button } from './capsule';
 
 const SectionStart = ({
   typingWords,
-  typingClassName = "text-2xl sm:text-3xl font-bold text-white",
-  typingCursorClassName = "text-blue-400",
+  typingClassName = "text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white",
+  typingCursorClassName = "text-blue-500 dark:text-blue-400",
   buttonText,
   buttonProps = {},
   className = "",
 }) => {
   return (
-    <div className={`min-h-[50vh] flex flex-col items-center justify-center gap-6 text-white ${className}`}>
-        {buttonText && (
+    <div className={`min-h-[50vh] flex flex-col items-center justify-center gap-6 ${className}`}>
+      {buttonText && (
         <Button
-          className=" text-white px-6 py-2 rounded-full font-semibold"
+          className={`px-6 py-2 rounded-full font-semibold transition-colors duration-200
+                      bg-white text-gray-900 border border-gray-300 hover:bg-gray-100
+                      dark:bg-neutral-800 dark:text-white dark:border-neutral-600 dark:hover:bg-neutral-700
+                      ${buttonProps.className || ''}`}
           {...buttonProps}
         >
           {buttonText}
         </Button>
       )}
+
       <TypingText
         words={typingWords}
         className={typingClassName}
         cursorClassName={typingCursorClassName}
       />
-      
     </div>
   );
 };
