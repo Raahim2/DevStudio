@@ -56,9 +56,9 @@ const Topbar = ({
   };
 
   return (
-    <div className="h-14 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 shrink-0">
+    <div className="[.dark_&]:bg-gray-800 [.dark_&]:text-white h-14 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 shrink-0">
       {/* Left Section: Repository Selector and Eject Button */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 ">
         {/* Repository Dropdown */}
         <div className="relative repo-dropdown-container">
           <button
@@ -103,7 +103,7 @@ const Topbar = ({
         <button
           onClick={() => { console.log("Eject clicked (placeholder)"); }}
           title="Eject (Placeholder)"
-          className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm transition-colors duration-150"
+          className="[.dark_&]:text-white flex items-center space-x-1 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-sm transition-colors duration-150"
         >
           <FiUploadCloud size={16} />
           <span>Eject</span>
@@ -112,7 +112,7 @@ const Topbar = ({
 
       {/* Middle Section: Static Title */}
       <div className="hidden md:flex items-center space-x-2 flex-shrink-0">
-        <span className="font-semibold text-gray-900 dark:text-gray-200">Chats</span>
+        <span className="font-semibold text-gray-900 dark:text-gray-200 [.dark_&]:text-white">Chats</span>
       </div>
 
       {/* Right Section: Actions and User Avatar */}

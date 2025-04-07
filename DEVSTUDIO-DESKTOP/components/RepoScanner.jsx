@@ -152,11 +152,11 @@ const handleGoToCodeClick = (filePath) => {
 
     return (
         // --- Overall Container ---
-        <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900 font-sans text-gray-900 dark:text-gray-100">
+        <div className="min-h-screen flex flex-col bg-gray-100 font-sans text-gray-900 dark:text-gray-100 [.dark_&]:bg-gray-800  ">
 
             {/* --- Header --- */}
-            <header className="bg-white dark:bg-gray-800 shadow-sm py-3 px-4 md:px-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
-                <h1 className="text-lg font-semibold">
+            <header className="bg-white [.dark_&]:bg-gray-800 dark:bg-gray-800 shadow-sm py-3 px-4 md:px-6 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+                <h1 className="text-lg font-semibold [.dark_&]:text-white [.dark_&]:bg-gray-800">
                     Repository Security Scanner
                     {scanVersion && <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">(Engine v{scanVersion})</span>}
                 </h1>
@@ -168,14 +168,14 @@ const handleGoToCodeClick = (filePath) => {
                 {/* --- Left Column / Control Panel --- */}
                 <div className="lg:col-span-4 xl:col-span-3">
                      <div className="sticky top-[70px]"> {/* Adjust top value based on header height + desired gap */}
-                        <div className="bg-white dark:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 shadow-md rounded-lg">
-                            <h2 className="text-base font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
+                        <div className="bg-white dark:bg-gray-800 [.dark_&]:bg-gray-800 p-4 border border-gray-200 dark:border-gray-700 shadow-md rounded-lg">
+                            <h2 className="text-base font-semibold text-gray-700 [.dark_&]:text-white [.dark_&]:bg-gray-800 border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
                                 Scan Configuration
                             </h2>
                             <div className="space-y-4">
                                 {/* Repo Input */}
                                 <div>
-                                    <label htmlFor="repoUrlInput" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                    <label htmlFor="repoUrlInput" className="block text-xs font-medium text-gray-600 [.dark_&]:text-white mb-1">
                                         Target Repository <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -211,8 +211,8 @@ const handleGoToCodeClick = (filePath) => {
 
                             {/* --- Status Area --- */}
                             <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-600">
-                                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Status</h3>
-                                {scanStatus === 'idle' && ( <p className="text-sm text-gray-600 dark:text-gray-400">Ready to scan.</p> )}
+                                <h3 className="text-xs font-semibold text-gray-500 [.dark_&]:text-white uppercase tracking-wider mb-2">Status</h3>
+                                {scanStatus === 'idle' && ( <p className="text-sm text-gray-600 [.dark_&]:text-white">Ready to scan.</p> )}
                                 {scanStatus === 'scanning' && ( <div className="text-sm text-blue-600 dark:text-blue-400 flex items-center font-medium"><Spinner /> In progress...</div> )}
                                 {scanStatus === 'error' && error && (
                                     <div className="border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-200 rounded-r-md" role="alert">
@@ -368,12 +368,12 @@ const handleGoToCodeClick = (filePath) => {
 
                     {/* --- Placeholder for Initial/Loading State (No changes needed here) --- */}
                      {scanStatus !== 'completed' && scanStatus !== 'error' && (
-                         <div className="flex items-center justify-center text-center py-16 px-6 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800/50 min-h-[300px]">
+                         <div className="flex items-center justify-center text-center py-16 px-6 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-white [.dark_&]:bg-gray-800 min-h-[300px]">
                             {scanStatus === 'idle' &&
                                 <div>
                                     <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                                    <p className="mt-3 text-sm font-medium">Scan results will appear here.</p>
-                                    <p className="mt-1 text-xs">Enter a repository identifier and click "Start Scan".</p>
+                                    <p className="mt-3 text-sm font-medium [.dark_&]:text-white">Scan results will appear here.</p>
+                                    <p className="mt-1 text-xs [.dark_&]:text-white ">Enter a repository identifier and click "Start Scan".</p>
                                 </div>
                             }
                             {scanStatus === 'scanning' &&

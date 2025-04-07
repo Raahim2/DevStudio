@@ -189,7 +189,7 @@ const ChatSection = ({
     // --- JSX Rendering ---
     return (
         // Main container for the chat section
-        <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden h-full border-l border-gray-200 dark:border-gray-700">
+        <div className="[.dark_&]:bg-gray-800  [.dark_&]:border-gray-800 flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden h-full border-l border-gray-200 dark:border-gray-700">
 
             {/* Scrollable Chat Messages Area */}
             <div

@@ -32,10 +32,10 @@ const ChatInput = ({
                            : "Type your message...";
 
     return (
-        <div className="flex-shrink-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 shadow-md">
+        <div className="[.dark_&]:bg-gray-800  flex-shrink-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 shadow-md">
              {/* Selected File Context Indicator */}
              {selectedFile && (
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-2 px-1 flex items-center justify-center truncate">
+                  <div className="[.dark_&]:text-white text-xs text-gray-600 dark:text-gray-400 mb-2 px-1 flex items-center justify-center truncate">
                      <FiPaperclip size={12} className="mr-1 flex-shrink-0 text-gray-500" />
                      <span className="font-medium mr-1">Context:</span>
                      {isFileLoading ? ( <span className="italic flex items-center text-gray-500"><FiCpu size={12} className="mr-1 animate-spin"/>Loading {selectedFile.name}...</span>)
@@ -58,14 +58,14 @@ const ChatInput = ({
              )}
 
              {/* Text Input & Send Button Wrapper */}
-            <div className="relative flex items-end">
+            <div className="relative flex items-end ">
                 <textarea
                     placeholder={placeholderText}
                     value={inputValue}
                     onChange={onInputChange}
                     onKeyDown={handleKeyDown}
                     rows={1}
-                    className="flex-1 py-2.5 pl-4 pr-12 bg-gray-100 dark:bg-gray-700 rounded-xl border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed transition-shadow focus:shadow-md placeholder-gray-500 dark:placeholder-gray-400"
+                    className="[.dark_&]:bg-gray-800 [.dark_&]:text-white flex-1 py-2.5 pl-4 pr-12 bg-gray-100 dark:bg-gray-700 rounded-xl border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed transition-shadow focus:shadow-md placeholder-gray-500 dark:placeholder-gray-400"
                     disabled={isDisabled}
                     style={{ maxHeight: '120px', overflowY: 'auto' }}
                     aria-label="Chat input message"

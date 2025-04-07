@@ -24,7 +24,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   return (
     // Base: gray-200. Dark: gray-900 using [.dark_&]: prefix
-    <div className="w-16 bg-gray-200 [.dark_&]:bg-gray-900 flex flex-col items-center py-4 space-y-6 h-full">
+    <div className="[.dark_&]:bg-gray-800 not-only:w-16 bg-gray-200  flex flex-col items-center py-4 space-y-6 h-full">
       {/* Map over the sidebarItems array */}
       {sidebarItems.map((item, index) => (
         <button

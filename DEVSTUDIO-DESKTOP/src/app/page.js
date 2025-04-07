@@ -16,7 +16,7 @@ import RepoScanner from '../../components/RepoScanner'; // Corrected path assumi
 const GITHUB_ACCESS_TOKEN_KEY = 'github_access_token';
 
 const PlaceholderView = ({ tabName }) => (
-    <div className="flex flex-1 flex-col items-center justify-center p-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+    <div className="[.dark_&]:text-white [.dark_&]:bg-gray-800 flex flex-1 flex-col items-center justify-center p-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-2">Welcome to {tabName}</h2>
         <p>Content for {tabName} will be displayed here.</p>
         {/* Ensure this container takes up space */}
@@ -385,9 +385,9 @@ export default function Home() {
 
                 {/* --- Code / Chat Tab Container --- */}
                 {/* This container is visible if EITHER Code or Chat is active */}
-                <div style={{ display: (activeTab === 'Code' || activeTab === 'Chat') ? 'flex' : 'none' }} className="flex flex-1 overflow-hidden">
+                <div style={{ display: (activeTab === 'Code' || activeTab === 'Chat') ? 'flex' : 'none' }} className="flex flex-1 overflow-hidden ">
                      {!selectedRepo && sessionStatus === 'authenticated' ? (
-                        <div className="flex flex-1 items-center justify-center p-6 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
+                        <div className="[.dark_&]:text-white [.dark_&]:bg-gray-800 flex flex-1 items-center justify-center p-6 text-center text-gray-500  bg-gray-50 dark:bg-gray-900">
                              {isRepoListLoading ? <FiLoader size={24} className="animate-spin text-blue-500" />
                                 : repoListError ? <span className="text-red-500">Error loading repositories: {repoListError}</span>
                                 : userRepos.length > 0 ? 'Please select a repository from the dropdown.'
@@ -443,8 +443,8 @@ export default function Home() {
                 <div style={{ display: activeTab === 'Notifications' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
                      {/* Conditionally render based on repo selection *within* the persistent container */}
                      {!selectedRepo && sessionStatus === 'authenticated' ? (
-                          <div className="flex flex-1 items-center justify-center p-6 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">
-                              {isRepoListLoading ? <FiLoader size={24} className="animate-spin text-blue-500" />
+                          <div className="flex flex-1 items-center justify-center p-6 text-center text-gray-500 [.dark_&]:text-white bg-gray-50 [.dark_&]:bg-gray-800">
+                              {isRepoListLoading ? <FiLoader size={24} className="animate-spin text-blue-500 " />
                                   : repoListError ? <span className="text-red-500">Error: {repoListError}</span>
                                   : userRepos.length > 0 ? 'Please select a repository to scan.'
                                   : 'No repositories found or you may not have access.'}

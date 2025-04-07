@@ -437,7 +437,7 @@ const CodeDisplay = ({
                             </div>
                         </>
                     ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-400 px-2">
+                        <span className="text-sm text-gray-500 dark:text-gray-400 px-2 [.dark_&]:text-white">
                             Select a file to view its content.
                         </span>
                     )}
@@ -459,7 +459,7 @@ const CodeDisplay = ({
                         </div>
                     )}
                      {!selectedFile && !isLoading && !fileError && (
-                        <div className="flex flex-1 flex-col items-center justify-center h-full p-6 text-gray-500 dark:text-gray-400">
+                        <div className="[.dark_&]:text-white [.dark_&]:bg-gray-800 flex flex-1 flex-col items-center justify-center h-full p-6 text-gray-500 dark:text-gray-400">
                             <FiCode size={48} className="mb-4 opacity-50" />
                             <p>Select a file from the list on the left to edit.</p>
                         </div>
