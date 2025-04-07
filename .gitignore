@@ -1,0 +1,6 @@
+node_modules
+out
+.env.local
+DEVSTUDIO-WEBSTIE/node_modules
+DEVSTUDIO-DESKTOP/node_modules
+.next

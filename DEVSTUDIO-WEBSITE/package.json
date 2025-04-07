@@ -1,0 +1,31 @@
+{
+  "name": "devstudio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@tabler/icons-react": "^3.31.0",
+    "clsx": "^2.1.1",
+    "motion": "^12.6.3",
+    "next": "15.2.4",
+    "next-auth": "^4.24.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.17"
+  }
+}
