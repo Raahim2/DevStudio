@@ -12,6 +12,7 @@ import CommitModal from '../../components/CommitModal';
 import { FiLoader } from 'react-icons/fi';
 import { useGitHubApi } from '../../hooks/useGitHubApi';
 import RepoScanner from '../../components/RepoScanner'; // Corrected path assuming it's in components
+import AutomationTab from '../../components/Automation';
 
 const GITHUB_ACCESS_TOKEN_KEY = 'github_access_token';
 
@@ -440,7 +441,7 @@ export default function Home() {
 
 
                 {/* --- Notifications Tab (RepoScanner) --- */}
-                <div style={{ display: activeTab === 'Notifications' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
+                <div style={{ display: activeTab === 'Scanner' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
                      {/* Conditionally render based on repo selection *within* the persistent container */}
                      {!selectedRepo && sessionStatus === 'authenticated' ? (
                           <div className="flex flex-1 items-center justify-center p-6 text-center text-gray-500 [.dark_&]:text-white bg-gray-50 [.dark_&]:bg-gray-800">
@@ -469,7 +470,8 @@ export default function Home() {
 
                 {/* --- Automation Tab --- */}
                 <div style={{ display: activeTab === 'Automation' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
-                    <PlaceholderView tabName="Automation" />
+                    {/* <PlaceholderView tabName="Automation" /> */}
+                    <AutomationTab/>
                 </div>
 
                 {/* Optional: Fallback for unknown activeTab */}

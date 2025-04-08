@@ -136,17 +136,19 @@ const RepoScanner = ({ repoUrl: initialRepoUrl, accessToken, setActiveTab, setSe
 
    // Helper function for the Go-To-Code button click
 const handleGoToCodeClick = (filePath) => {
-    const basePath = '/home/oman/devstudio/SkillX/';
-    const relativePath = filePath.startsWith(basePath) ? filePath.replace(basePath, '') : filePath;
+            setActiveTab('Code'); // <-- Make sure 'Code' is the correct key for your code tab
+
+    // const basePath = '/home/oman/devstudio/SkillX/';
+    // const relativePath = filePath.startsWith(basePath) ? filePath.replace(basePath, '') : filePath;
     
-    console.log(`Go-To-Code clicked for file: ${relativePath}`);
+    // console.log(`Go-To-Code clicked for file: ${relativePath}`);
     
-    if (relativePath && typeof setSelectedFile === 'function' && typeof setActiveTab === 'function') {
-        setSelectedFile(relativePath);
-        setActiveTab('Code'); // <-- Make sure 'Code' is the correct key for your code tab
-    } else {
-        console.warn('Missing filePath, setSelectedFile, or setActiveTab for Go-To-Code functionality.');
-    }
+    // if (relativePath && typeof setSelectedFile === 'function' && typeof setActiveTab === 'function') {
+    //     setSelectedFile(relativePath);
+    //     setActiveTab('Code'); // <-- Make sure 'Code' is the correct key for your code tab
+    // } else {
+    //     console.warn('Missing filePath, setSelectedFile, or setActiveTab for Go-To-Code functionality.');
+    // }
 };
 
 

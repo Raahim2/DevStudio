@@ -7,7 +7,9 @@ import {
   FiBell,
   FiSettings,
   FiZap, // Using FiZap for Automation
-  FiDownload
+  FiDownload,
+  FiAlertCircle
+  
 } from 'react-icons/fi';
 
 // Accept activeTab and setActiveTab as props
@@ -17,8 +19,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { icon: FiHome, label: 'Home' },
     { icon: FiMessageSquare, label: 'Chat' },
     { icon: FiCode, label: 'Code' },
-    { icon: FiBell, label: 'Notifications' },
-    { icon: FiSettings, label: 'Settings' },
+    { icon: FiAlertCircle, label: 'Scanner' },
+    // { icon: FiSettings, label: 'Settings' },
     { icon: FiZap, label: 'Automation' },
   ];
 
