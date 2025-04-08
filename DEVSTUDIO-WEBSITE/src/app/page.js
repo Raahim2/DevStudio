@@ -138,7 +138,7 @@ export default function HomePage() {
             </button>
           </div>
         </main>
-
+""
         {/* --- Bouncing Arrow --- */}
         {/* Keep this positioned relative to the outer container if desired */}
         <div className="absolute bottom-8 md:bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10"> {/* Added z-index */}
@@ -148,7 +148,7 @@ export default function HomePage() {
         </div>
 
         {/* --- Optional Macbook Scroll --- */}
-        <div className="my-16 md:my-24"> <MacbookScroll showGradient={true} /> </div>
+        <div className="my-16 md:my-24"> <MacbookScroll showGradient={true} src="https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4"/> </div>
 
 
         {/* --- Section Dividers and Content --- */}
@@ -172,7 +172,7 @@ export default function HomePage() {
         </div>
 
         {/* --- SectionStart 2 --- */}
-        <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> {/* Added padding */}
+        {/* <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> 
           <SectionStart
             typingWords={[
               { text: "See ", className: "text-gray-700 dark:text-neutral-400" },
@@ -181,15 +181,15 @@ export default function HomePage() {
             ]}
             buttonText="Overview"
           />
-        </div>
+        </div> */}
 
         {/* --- Tabs Section --- */}
         {/* Container needs vertical margin. Max-width and centering are good. */}
         {/* Let Tabs component handle its own internal padding if needed */}
-        <div className="h-[20rem] md:h-[40rem] [perspective:1000px] relative flex flex-col max-w-5xl mx-auto w-full items-start justify-start my-16 md:my-24 px-4 sm:px-6 lg:px-8">
+        {/* <div className="h-[20rem] md:h-[40rem] [perspective:1000px] relative flex flex-col max-w-5xl mx-auto w-full items-start justify-start my-16 md:my-24 px-4 sm:px-6 lg:px-8"> */}
            {/* Added horizontal padding */}
-          <Tabs tabs={tabs} />
-        </div>
+          {/* <Tabs tabs={tabs} /> */}
+        {/* </div> */}
 
         {/* --- SectionStart 3 --- */}
         <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> {/* Added padding */}
