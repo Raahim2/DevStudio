@@ -15,7 +15,7 @@ import './globals.css';
 
 export default function HomePage() {
   const placeholders = [
-    "Ask Grok anything...",
+    "Ask anything...",
     "What's the latest news?",
     "Explain quantum computing simply",
     "Summarize the concept of multimodal AI",
@@ -126,19 +126,19 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <button className="w-full sm:w-auto text-xs sm:text-sm font-medium uppercase tracking-wider rounded-full px-6 py-2.5 sm:px-7 sm:py-3 transition-all duration-200
+            <button onClick={() => window.location.href='#'} className="w-full sm:w-auto text-xs sm:text-sm font-medium uppercase tracking-wider rounded-full px-6 py-2.5 sm:px-7 sm:py-3 transition-all duration-200
                                 bg-gray-900 text-white hover:bg-gray-800 border border-gray-900 hover:border-gray-700
                                 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:text-white dark:hover:bg-neutral-700 dark:border dark:border-neutral-700 dark:hover:border-neutral-500">
               Build with DevStudio
             </button>
-            <button className="w-full sm:w-auto text-xs sm:text-sm font-medium uppercase tracking-wider rounded-full px-6 py-2.5 sm:px-7 sm:py-3 transition-all duration-200
+            <button onClick={() => window.location.href='#'} className="w-full sm:w-auto text-xs sm:text-sm font-medium uppercase tracking-wider rounded-full px-6 py-2.5 sm:px-7 sm:py-3 transition-all duration-200
                                 text-gray-800 hover:text-black border border-gray-400 hover:border-gray-600
                                 dark:text-neutral-200 dark:hover:text-white dark:border dark:border-neutral-600 dark:hover:border-neutral-300">
               Learn More
             </button>
           </div>
         </main>
-""
+
         {/* --- Bouncing Arrow --- */}
         {/* Keep this positioned relative to the outer container if desired */}
         <div className="absolute bottom-8 md:bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10"> {/* Added z-index */}
@@ -192,21 +192,21 @@ export default function HomePage() {
         {/* </div> */}
 
         {/* --- SectionStart 3 --- */}
-        <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> {/* Added padding */}
-          <SectionStart
+        <div className=" px-4 sm:px-6 lg:px-8"> {/* Added padding */}
+          {/* <SectionStart
             typingWords={[
               { text: "See ", className: "text-gray-700 dark:text-neutral-400" },
               { text: " Project. ", className: "text-gray-700 dark:text-neutral-400" },
               { text: " FAQ's", className: "text-gray-700 dark:text-neutral-400" },
             ]}
             buttonText="FAQ's"
-          />
+          /> */}
         </div>
 
         {/* --- FAQ Section --- */}
         {/* Let FAQ handle its own padding via max-w-3xl mx-auto px-4 etc. */}
         {/* Added bottom margin to the wrapper div */}
-        <div className="my-16 md:my-24">
+        <div className="mt-16 md:mt-24">
            {/* Removed fixed height/perspective. Let FAQ control its size */}
            <FAQ/>
         </div>

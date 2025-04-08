@@ -78,7 +78,7 @@ export const MacbookScroll = ({
               translateY: textTransform,
               opacity: textOpacity,
             }}
-            className="mb-20 text-center text-3xl font-bold text-neutral-800 dark:text-white"
+            className="mb-20 text-center text-3xl font-bold text-neutral-800 dark:text-white w-fit h-fit "
           >
             {/* Optional Title Here */}
           </motion.h2>
@@ -434,17 +434,3 @@ export const Trackpad = () => {
       </svg>
     );
   };
-
-// Example Usage (in another component):
-// import { MacbookScroll } from './MacbookScroll'; // Adjust path
-//
-// function MyPage() {
-//   const videoUrl = "/path/to/your/video.mp4"; // Or "https://example.com/video.webm" etc.
-//   return (
-//     <div>
-//       {/* Other content */}
-//       <MacbookScroll src={videoUrl} showGradient={true} />
-//       {/* Other content */}
-//     </div>
-//   );
-// }

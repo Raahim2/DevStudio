@@ -21,7 +21,7 @@ const Footer = () => {
               {['features', 'pricing', 'docs'].map((link) => (
                 <li key={link}>
                   <Link
-                    href={`/${link}`}
+                    href="#"
                     className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                   >
                     {link.charAt(0).toUpperCase() + link.slice(1)}
@@ -38,7 +38,7 @@ const Footer = () => {
               {['blog', 'tutorials', 'support'].map((link) => (
                 <li key={link}>
                   <Link
-                    href={`/${link}`}
+                    href="#"
                     className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                   >
                     {link.charAt(0).toUpperCase() + link.slice(1)}
@@ -53,9 +53,9 @@ const Footer = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Connect</h3>
             <div className="flex space-x-4">
               {[
-                { href: 'https://twitter.com/devstudio', label: 'Twitter' },
-                { href: 'https://github.com/devstudio', label: 'GitHub' },
-                { href: 'https://linkedin.com/company/devstudio', label: 'LinkedIn' }
+                { href: '#', label: 'Twitter' },
+                { href: '#', label: 'GitHub' },
+                { href: '#', label: 'LinkedIn' }
               ].map((item, index) => (
                 <a
                   key={index}
@@ -87,7 +87,7 @@ const Footer = () => {
               {['privacy', 'terms'].map((link) => (
                 <Link
                   key={link}
-                  href={`/${link}`}
+                  href="#"
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                 >
                   {link === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}

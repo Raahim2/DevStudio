@@ -20,27 +20,29 @@ const MoonIcon = () => (
 // --- End Icons ---
 
 
-const Logo = () => (
-  // Your Logo SVG remains the same
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-       className="text-black dark:text-white transition-colors duration-200"> {/* Added dark mode styling */}
-    <path d="M12 1.99988L17.5 9.99988L12 17.9999L6.5 9.99988L12 1.99988Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 1.99988L17.5 9.99988L21.5 1.99988" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 1.99988L6.5 9.99988L2.5 1.99988" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 17.9999L17.5 9.99988L21.5 17.9999" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 17.9999L6.5 9.99988L2.5 17.9999" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+const Logo = ({ theme, mounted }) => {
+  if (!mounted) return null;
+
+  return (
+    <div className="w-[80px] h-auto">
+      {theme === 'dark' ? (
+        <img src="/light_logo.webp" alt="Dark Logo" className="h-16 w-auto" />
+      ) : (
+        <img src="/dark_logo.webp" alt="Light Logo" className="h-16 w-auto" />
+      )}
+    </div>
+  );
+};
+
 
 
 const Navbar = () => {
   const navItems = [
-    { name: 'GROK', href: '/grok' },
-    { name: 'API', href: '/api' },
-    { name: 'COMPANY', href: '/company' },
-    { name: 'COLOSSUS', href: '/colossus' },
-    { name: 'CAREERS', href: '/careers' },
-    { name: 'NEWS', href: '/news' },
+    { name: 'FEATURES', href: '#' },
+    { name: 'PRICING', href: '#' },
+    { name: 'DOCS', href: '#' },
+    { name: 'BLOG', href: '#' },
+    { name: 'TUTORIALS', href: '#' },
   ];
 
   // --- Theme Toggle Logic ---
@@ -69,8 +71,8 @@ const Navbar = () => {
     <nav className="w-full px-6 sm:px-10 py-4 flex items-center justify-between absolute top-0 left-0 z-50 bg-transparent transition-colors duration-200">
       <div className="flex items-center space-x-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
-            <Logo />
+        <Link href="#" className="flex items-center">
+        <Logo theme={theme} mounted={mounted} />
         </Link>
 
         {/* Navigation Links */}
@@ -87,7 +89,7 @@ const Navbar = () => {
 
       {/* Right Side: Button + Theme Toggle */}
       <div className="flex items-center space-x-4"> {/* Use flex to align items */}
-        <Link href="/try-grok" className={buttonLinkClasses}>
+        <Link href="#" className={buttonLinkClasses}>
             Install Devstudio
         </Link>
 

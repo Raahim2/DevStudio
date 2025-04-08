@@ -3,22 +3,28 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { InteractiveGridPattern } from "./magicui/interactive-grid-pattern";
+import Image from "next/image";
 
 // Placeholder Logo
 const LogoIcon = () => (
-  <svg
-    className="w-12 h-12 md:w-16 md:h-16 text-blue-500 dark:text-blue-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.037-.502.068-.75.097m.75-.097a2.25 2.25 0 00-.75 0M9.75 3.104c.621 0 1.125-.504 1.125-1.125a1.125 1.125 0 00-1.125-1.125c-.621 0-1.125.504-1.125 1.125 0 .621.504 1.125 1.125 1.125zM9.75 8.818v5.714a2.25 2.25 0 01-.659 1.591L5 14.5m4.75 0a2.25 2.25 0 01.659-1.591V8.818m-.659 5.714l4.341-4.341a2.25 2.25 0 000-3.182L9.75 3.104m4.341 4.341a2.25 2.25 0 00-3.182 0l-4.341 4.341m0 0a2.25 2.25 0 00.659 1.591l3.682 3.682a2.25 2.25 0 003.182 0l4.341-4.341M5 14.5c.621 0 1.125-.504 1.125-1.125a1.125 1.125 0 00-1.125-1.125c-.621 0-1.125.504-1.125 1.125 0 .621.504 1.125 1.125 1.125z"
+  <div className="relative w-32 h-32">
+    {/* Light Logo */}
+    <Image
+      src="/dark_logo.webp"
+      alt="Logo Light"
+      fill
+      className="block dark:hidden object-contain"
+      priority
     />
-  </svg>
+    {/* Dark Logo */}
+    <Image
+      src="/light_logo.webp"
+      alt="Logo Dark"
+      fill
+      className="hidden dark:block object-contain"
+      priority
+    />
+  </div>
 );
 
 // Icons
@@ -73,7 +79,7 @@ const GetStartedSection = () => {
         {/* Terms Text */}
         <p className="text-xs sm:text-sm text-gray-600 dark:text-neutral-400 mb-8 md:mb-10">
           By using DevStudio, you agree to its{' '}
-          <a href="/terms" className="underline hover:text-gray-800 dark:hover:text-neutral-300 transition-colors">
+          <a href="#" className="underline hover:text-gray-800 dark:hover:text-neutral-300 transition-colors">
             terms of use
           </a>
           .
@@ -81,11 +87,11 @@ const GetStartedSection = () => {
 
         {/* Bottom Links */}
         <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
-          <a href="#signup" className="inline-flex items-center text-sm text-gray-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors">
+          <a href="#" className="inline-flex items-center text-sm text-gray-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors">
             <EnvelopeIcon />
             <span className="underline">Sign up for email updates</span>
           </a>
-          <a href="#beta" className="inline-flex items-center text-sm text-gray-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors">
+          <a href="#" className="inline-flex items-center text-sm text-gray-700 dark:text-neutral-300 hover:text-black dark:hover:text-white transition-colors">
             <HammerIcon />
             <span className="underline">Sign up for beta versions</span>
           </a>
