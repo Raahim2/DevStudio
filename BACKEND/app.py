@@ -4,9 +4,11 @@ from supabase import create_client, Client
 import os
 import subprocess
 import json
+from flask_cors import CORS
 from pathlib import Path
 
 app = Flask(__name__)
+CORS(app)
 
 
 SUPABASE_URL = "https://pyrfjucblogdhkfhzgbi.supabase.co"
@@ -147,12 +149,18 @@ def send_query():
     if request.method == 'POST':
         data = request.get_json()
 
+        print("Got data",data)
+
         repo_url = data.get('repo_url')
         access_token = data.get('access_token')
 
-        if not repo_url or not access_token:
-            return jsonify({"error": "Missing one of the required parameters"}), 400
+        if not repo_url:
+            return jsonify({"error": "Missing url"}), 400
         
+        if not access_token:
+            return jsonify({"error": "Missing access token"}), 400
+        
+
         print(f"[-] Recieved repo : {repo_url}")
         print(f"[-] Recieved access token : {access_token}")
 
@@ -163,7 +171,7 @@ def send_query():
 def push_notif():
     if request.method == 'POST':
         data = request.get_json()
-
+        
         repo_url = data.get('repo_url')
         access_token = data.get('access_token')
         notification = data.get('notification')
