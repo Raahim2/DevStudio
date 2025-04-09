@@ -89,9 +89,14 @@ const Navbar = () => {
 
       {/* Right Side: Button + Theme Toggle */}
       <div className="flex items-center space-x-4"> {/* Use flex to align items */}
-        <Link href="#" className={buttonLinkClasses}>
-            Install Devstudio
-        </Link>
+        <Link
+  href="https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio.Setup.0.1.0.exe"
+  className={buttonLinkClasses}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Install Devstudio
+</Link>
 
         {/* --- Theme Toggle Button --- */}
         <button
