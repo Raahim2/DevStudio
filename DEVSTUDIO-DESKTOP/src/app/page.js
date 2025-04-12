@@ -94,6 +94,9 @@ export default function Home() {
         let cleanupPerformed = false;
         let initialToken = null;
 
+        // setAccessToken("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i");
+        // setSessionStatus('authenticated');
+
         try {
           initialToken = localStorage.getItem(GITHUB_ACCESS_TOKEN_KEY);
           if (initialToken) {

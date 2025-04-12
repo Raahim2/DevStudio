@@ -1,180 +1,192 @@
 // src/hooks/useGitHubApi.js
 import { useState, useCallback } from 'react';
 
-const GITHUB_API_BASE = 'https://api.github.com';
-
-// Helper: Base64 Encode
+// Helper: Base64 Encode (ensure Buffer is available or use window.btoa)
 const encodeBase64 = (str) => {
     try {
-        // Use TextEncoder for reliable UTF-8 handling
-        const bytes = new TextEncoder().encode(str);
-        // Convert bytes to a binary string
-        const binString = String.fromCodePoint(...bytes);
-        // Base64 encode the binary string
-        return btoa(binString);
-    } catch (e) {
-        console.error("Base64 encoding failed with TextEncoder:", e);
-        // Fallback for environments where TextEncoder might not be available or fails
-        try {
-            // This fallback might have issues with certain Unicode characters
-            return btoa(unescape(encodeURIComponent(str)));
-        } catch (e2) {
-            console.error("Base64 encoding fallback failed:", e2);
-            return null; // Indicate failure
+        // Node.js/Webpack Buffer method (more robust for UTF-8)
+        if (typeof Buffer !== 'undefined') {
+            return Buffer.from(str, 'utf-8').toString('base64');
         }
+        // Browser's btoa (might have issues with some Unicode chars)
+        return window.btoa(unescape(encodeURIComponent(str)));
+    } catch (e) {
+        console.error("Base64 encoding failed:", e);
+        return null; // Indicate failure
     }
 };
 
+const GITHUB_API_BASE = 'https://api.github.com';
 
 export const useGitHubApi = (accessToken, selectedRepoFullName) => {
-    const [isCommitting, setIsCommitting] = useState(false);
-    const [commitError, setCommitError] = useState(null);
-    const [commitSuccess, setCommitSuccess] = useState(false); // Tracks success for UI feedback
+    // Unified loading/error/success state for *any* content operation (create/update/delete)
+    const [isOperating, setIsOperating] = useState(false);
+    const [operationError, setOperationError] = useState(null);
+    const [operationSuccess, setOperationSuccess] = useState(false); // Generic success state
 
-    /**
-     * Attempts to commit code changes to a specific file in the selected GitHub repository.
-     * @param {string} codeContent - The new content of the file.
-     * @param {string} commitMessage - The message for the commit.
-     * @param {string} filePath - The path to the file within the repository.
-     * @param {string} fileSha - The *expected* current SHA of the file blob (required to prevent overwriting).
-     * @returns {Promise<{success: boolean, newSha: string | null}>} - A promise resolving to an object indicating success and the new SHA if successful.
-     */
-    const commitCode = useCallback(async (codeContent, commitMessage, filePath, fileSha) => {
-        // --- Precondition Checks ---
-        if (!selectedRepoFullName) {
-            console.error("Commit Hook Error: Repository not selected.");
-            setCommitError("Cannot commit: Repository not selected.");
-            return { success: false, newSha: null };
-        }
-        if (!accessToken) {
-            console.error("Commit Hook Error: Access token missing.");
-            setCommitError("Cannot commit: Authentication token missing.");
-            return { success: false, newSha: null };
-        }
-        if (!filePath) {
-            console.error("Commit Hook Error: File path missing.");
-            setCommitError("Cannot commit: File path is required.");
-            return { success: false, newSha: null };
-        }
-        if (!fileSha) {
-            console.error("Commit Hook Error: File SHA missing.");
-            // This is critical for preventing overwrites
-            setCommitError("Cannot commit: Current file SHA is required (for conflict detection).");
-            return { success: false, newSha: null };
+    // --- Helper for API Calls ---
+    const makeApiCall = useCallback(async (method, path, bodyData = null, operationVerb = 'operate') => {
+        if (!selectedRepoFullName || !accessToken) {
+            const errorMsg = !selectedRepoFullName ? "Repository not selected." : "Access token missing.";
+            console.error(`GitHub API Hook Error (${operationVerb}): ${errorMsg}`);
+            setOperationError(`Cannot ${operationVerb}: ${errorMsg}`);
+            return { success: false, data: null, error: errorMsg };
         }
 
-        // --- Start Commit Process ---
-        setIsCommitting(true);
-        setCommitError(null); // Clear previous errors
-        setCommitSuccess(false); // Reset success state
+        setIsOperating(true);
+        setOperationError(null);
+        setOperationSuccess(false);
 
-        const apiUrl = `${GITHUB_API_BASE}/repos/${selectedRepoFullName}/contents/${filePath}`;
-        const encodedContent = encodeBase64(codeContent);
-
-        // Handle encoding failure
-        if (encodedContent === null) {
-            setCommitError("Failed to encode file content for commit.");
-            setIsCommitting(false);
-            return { success: false, newSha: null };
+        const apiUrl = `${GITHUB_API_BASE}/repos/${selectedRepoFullName}/contents/${path}`;
+        const headers = {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/vnd.github.v3+json',
+        };
+        if (bodyData) {
+            headers['Content-Type'] = 'application/json';
         }
 
-        // --- Prepare Request Body ---
-        const body = JSON.stringify({
-            message: commitMessage, // The commit message
-            content: encodedContent, // The new file content, base64 encoded
-            sha: fileSha, // The SHA of the file blob being replaced
-            // Optionally add branch, committer, author fields if needed
-            // branch: 'main' // Example: Specify branch if not default
-        });
-
-        // --- Make API Call ---
         try {
-            console.log(`Attempting commit via hook: PUT ${apiUrl} (Replacing SHA: ${fileSha})`);
+            console.log(`GitHub API Hook: ${method} ${apiUrl}`, bodyData ? 'with body' : '');
             const response = await fetch(apiUrl, {
-                method: 'PUT', // Use PUT to update existing file content
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json',
-                },
-                body: body,
+                method: method,
+                headers: headers,
+                ...(bodyData && { body: JSON.stringify(bodyData) })
             });
 
-            // --- Handle API Response ---
+            let responseData = null;
+             // Handle 204 No Content specifically for DELETE success
+            if (response.status === 204 && method === 'DELETE') {
+                 responseData = { message: "Successfully deleted" }; // Synthesize success data
+            } else {
+                // Try to parse JSON for other responses, even errors
+                 try {
+                    responseData = await response.json();
+                 } catch (e) {
+                     // If response is not JSON (e.g., unexpected server error), create placeholder
+                     responseData = { message: response.statusText || 'Could not parse response' };
+                 }
+            }
+
+
             if (!response.ok) {
-                // Attempt to parse error details from GitHub response
                 let errorMsg = `GitHub API Error (${response.status})`;
-                let errorData = null;
-                try {
-                    errorData = await response.json();
-                    errorMsg += `: ${errorData.message || 'No specific message from GitHub.'}`;
-                } catch (e) {
-                    errorMsg += `: ${response.statusText || 'Could not parse error response.'}`;
-                }
+                errorMsg += `: ${responseData?.message || 'No specific message.'}`;
 
-                // Add specific user-friendly messages for common errors
-                if (response.status === 409) {
-                    // CONFLICT: The SHA provided didn't match the file on the server
-                    errorMsg += ` (Conflict: File SHA ${fileSha} didn't match remote. Content may have changed externally. Refresh file content.)`;
-                } else if (response.status === 404) {
-                    errorMsg += " (Not Found: Check file path and repository access permissions.)";
-                } else if (response.status === 422) {
-                    errorMsg += " (Unprocessable Entity: Request data might be invalid, or content is identical?)";
-                } else if (response.status === 401 || response.status === 403) {
-                    errorMsg += " (Authentication/Authorization Error: Check token validity and permissions.)";
-                }
+                // Add specific user-friendly messages
+                if (response.status === 409 && method === 'PUT') errorMsg += ` (Conflict: File SHA mismatch. Content may have changed.)`;
+                if (response.status === 409 && method === 'DELETE') errorMsg += ` (Conflict: File SHA mismatch or branch conflict.)`;
+                if (response.status === 404) errorMsg += " (Not Found: Check path/permissions.)";
+                if (response.status === 422 && method === 'PUT') errorMsg += " (Unprocessable: Data invalid, or file already exists/content identical?).";
+                 if (response.status === 422 && method === 'DELETE') errorMsg += " (Unprocessable: SHA required or invalid?)";
+                if (response.status === 401 || response.status === 403) errorMsg += " (Auth Error: Check token/permissions.)";
 
-                console.error("GitHub Commit failed:", errorMsg, { status: response.status, responseData: errorData });
-                setCommitError(errorMsg); // Set the error state for the UI
-                setIsCommitting(false);
-                setCommitSuccess(false);
-                return { success: false, newSha: null }; // Return failure
+                console.error(`GitHub ${operationVerb} failed:`, errorMsg, { status: response.status, responseData });
+                setOperationError(errorMsg);
+                setIsOperating(false);
+                return { success: false, data: responseData, error: errorMsg };
             }
 
             // --- SUCCESS ---
-            const responseData = await response.json();
-            console.log("GitHub Commit successful via hook. Response:", responseData);
-
-            // Extract the SHA of the newly created/updated content blob
-            const newContentSha = responseData?.content?.sha;
-
-            if (!newContentSha) {
-                 // This shouldn't happen on a successful 200/201, but log a warning if it does
-                 console.warn("Commit successful, but could not extract new content SHA from response. Response structure might have changed or be unexpected.", responseData);
-            }
-
-            // Update UI state for success
-            setCommitSuccess(true);
-            setIsCommitting(false);
-            setCommitError(null); // Clear any previous errors
-
-            // Automatically hide the success indicator after a short delay
-            setTimeout(() => setCommitSuccess(false), 3500);
-
-            // Return success status and the new SHA
-            return { success: true, newSha: newContentSha };
+            console.log(`GitHub ${operationVerb} successful. Response:`, responseData);
+            setOperationSuccess(true);
+            setIsOperating(false);
+            setOperationError(null);
+            setTimeout(() => setOperationSuccess(false), 3000); // Auto-hide success
+            return { success: true, data: responseData, error: null };
 
         } catch (error) {
-            // Handle network errors or other unexpected issues during fetch
-            console.error("Network or other error during GitHub commit hook:", error);
-            setCommitError(`Commit failed: ${error.message || 'Check network connection.'}`);
-            setIsCommitting(false);
-            setCommitSuccess(false);
-            return { success: false, newSha: null }; // Return failure
+            console.error(`Network/other error during GitHub ${operationVerb}:`, error);
+            const errorMsg = `${operationVerb.charAt(0).toUpperCase() + operationVerb.slice(1)} failed: ${error.message || 'Check network connection.'}`;
+            setOperationError(errorMsg);
+            setIsOperating(false);
+            return { success: false, data: null, error: errorMsg };
         }
-    }, [accessToken, selectedRepoFullName]); // Dependencies for the useCallback
 
-    // Function to allow manual clearing of the commit error from the UI
-    const clearCommitError = useCallback(() => {
-        setCommitError(null);
+    }, [accessToken, selectedRepoFullName]);
+
+
+    /**
+     * Creates a new file OR Updates an existing file in the repository.
+     * If fileSha is provided, it attempts an update. Otherwise, it attempts creation.
+     * @param {string} filePath - Path to the file.
+     * @param {string} content - New content of the file.
+     * @param {string} commitMessage - Commit message.
+     * @param {string} [fileSha] - The current SHA (required for UPDATE, omit for CREATE).
+     * @returns {Promise<{success: boolean, data: object | null, error: string | null}>}
+     */
+    const createFileOrUpdate = useCallback(async (filePath, content, commitMessage, fileSha = null) => {
+        const encodedContent = encodeBase64(content);
+        if (encodedContent === null) {
+            setOperationError("Failed to encode file content.");
+            return { success: false, data: null, error: "Encoding failed" };
+        }
+
+        const body = {
+            message: commitMessage,
+            content: encodedContent,
+            ...(fileSha && { sha: fileSha }), // Add sha only if updating
+             // branch: 'your-branch-name' // Optionally specify branch
+        };
+
+        const operationVerb = fileSha ? 'update' : 'create';
+        return makeApiCall('PUT', filePath, body, operationVerb);
+
+    }, [makeApiCall]);
+
+
+    /**
+     * Deletes a file from the repository.
+     * @param {string} filePath - Path to the file to delete.
+     * @param {string} fileSha - The current SHA of the file (required for deletion).
+     * @param {string} commitMessage - Commit message for the deletion.
+     * @returns {Promise<{success: boolean, data: object | null, error: string | null}>}
+     */
+    const deleteFile = useCallback(async (filePath, fileSha, commitMessage) => {
+        if (!fileSha) {
+            const errorMsg = "File SHA is required for deletion.";
+            setOperationError(`Cannot delete: ${errorMsg}`);
+             return { success: false, data: null, error: errorMsg };
+        }
+        const body = {
+            message: commitMessage,
+            sha: fileSha,
+             // branch: 'your-branch-name' // Optionally specify branch
+        };
+        return makeApiCall('DELETE', filePath, body, 'delete');
+    }, [makeApiCall]);
+
+    // --- Exposed Functions and State ---
+
+    // Specific function for clarity if needed, uses the generic one
+    const commitCode = useCallback((codeContent, commitMessage, filePath, fileSha) => {
+        return createFileOrUpdate(filePath, codeContent, commitMessage, fileSha);
+    }, [createFileOrUpdate]);
+
+    // Specific function for clarity, uses the generic one
+     const createFile = useCallback((filePath, content, commitMessage) => {
+         // Explicitly pass null for fileSha to ensure creation attempt
+         return createFileOrUpdate(filePath, content, commitMessage, null);
+     }, [createFileOrUpdate]);
+
+
+    const clearOperationError = useCallback(() => {
+        setOperationError(null);
     }, []);
 
-    // Return the state and functions needed by the consuming component
     return {
-        commitCode,        // The function to call to perform the commit
-        isCommitting,      // Boolean indicating if a commit is in progress
-        commitError,       // String containing the last commit error message, or null
-        commitSuccess,     // Boolean indicating if the last commit was successful
-        clearCommitError   // Function to manually clear the commit error message
+        // State
+        isOperating,        // Unified loading state for C/U/D operations
+        operationError,     // Unified error state
+        operationSuccess,   // Unified success state
+
+        // Actions
+        createFile,
+        commitCode,         // Alias for update using createFileOrUpdate
+        deleteFile,
+        clearOperationError, // To manually clear errors
+
+        // You might expose createFileOrUpdate directly if preferred
+        // createFileOrUpdate,
     };
 };

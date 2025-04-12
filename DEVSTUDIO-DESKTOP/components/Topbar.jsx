@@ -135,6 +135,14 @@ const Topbar = ({
         <span className="font-semibold text-gray-900 dark:text-gray-200 [.dark_&]:text-white">Chats</span>
       </div>
 
+      <div className="new-repo-modal-container">
+         <NewRepoModal
+           accessToken={accessToken}
+           isOpen={isNewRepoModalOpen}
+           onClose={closeNewRepoModal}
+         />
+      </div>
+
       {/* Right Section */}
       <div className="flex items-center space-x-1 md:space-x-2">
         {/* ... (Action buttons, Theme Toggle, Separator, User Avatar Dropdown remain the same) ... */}
@@ -207,16 +215,8 @@ const Topbar = ({
         </div>
       </div>
 
-      {/* --- Render the Modal --- */}
-      {/* Pass the state and the close function as props */}
-       {/* Add a class here if needed for the click outside check */}
-      <div className="new-repo-modal-container">
-         <NewRepoModal
-           accessToken={accessToken}
-           isOpen={isNewRepoModalOpen}
-           onClose={closeNewRepoModal}
-         />
-      </div>
+      
+      
 
     </div> // Close main Topbar div
   );
