@@ -3,12 +3,10 @@ const path = require('path');
 const url = require('url');
 
 // --- CONFIGURATION ---
-// This MUST match the NEXT_PUBLIC_APP_PROTOCOL in your Next.js .env.local
 const APP_PROTOCOL = 'devstudio';
-// This MUST point to the login API route on your Next.js website
 const WEBSITE_LOGIN_URL = 'http://devstudio-ai.vercel.app/api/auth/github/login';
-// --- Development Server URL ---
-const DEV_SERVER_URL = 'http://localhost:3000';
+// const DEV_SERVER_URL = 'https://devstudio-gamma.vercel.app/';
+const DEV_SERVER_URL = 'http://localhost:3000'; 
 // --- END CONFIGURATION ---
 
 let mainWindow;
@@ -20,16 +18,24 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false, // Keep false for security with remote content
+      nodeIntegration: false,
     },
   });
 
-  // Load the URL of the Next.js development server
   mainWindow.loadURL(DEV_SERVER_URL);
 
-  // Optionally, open DevTools automatically in development
-  mainWindow.webContents.openDevTools();
+  // Block Ctrl+Shift+I / Cmd+Opt+I to prevent DevTools opening
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    const isDevToolsShortcut =
+      (input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i';
 
+    if (isDevToolsShortcut) {
+      event.preventDefault();
+      console.log('[Main Process] Blocked DevTools shortcut');
+    }
+  });
+
+  // mainWindow.webContents.openDevTools(); // Remove or comment out in production
 
   mainWindow.on('closed', function () {
     mainWindow = null;
@@ -56,54 +62,46 @@ if (!gotTheLock) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
     }
-     // Process the URL from second instance launch (protocol link)
-     const protocolUrl = commandLine.pop(); // Usually the last argument
-     handleAuthCallback(protocolUrl);
+    const protocolUrl = commandLine.pop();
+    handleAuthCallback(protocolUrl);
   });
 
-  // Create window when ready
   app.whenReady().then(() => {
-    // No need to register file protocol when loading URL
     createWindow();
   });
 
-   // Handle protocol URL when app is already open (macOS)
-   app.on('open-url', (event, openedUrl) => {
-     event.preventDefault();
-     handleAuthCallback(openedUrl);
-   });
+  app.on('open-url', (event, openedUrl) => {
+    event.preventDefault();
+    handleAuthCallback(openedUrl);
+  });
 }
 
-// Function to process the custom protocol URL
+// Handle protocol callback
 function handleAuthCallback(protocolUrl) {
-   if (!protocolUrl || !protocolUrl.startsWith(`${APP_PROTOCOL}://`)) {
-        console.log('Ignoring non-protocol URL:', protocolUrl);
-        return;
+  if (!protocolUrl || !protocolUrl.startsWith(`${APP_PROTOCOL}://`)) {
+    console.log('Ignoring non-protocol URL:', protocolUrl);
+    return;
+  }
+
+  try {
+    const parsedUrl = new URL(protocolUrl);
+
+    if (parsedUrl.pathname.includes('callback')) {
+      const token = parsedUrl.searchParams.get('token');
+      if (token && mainWindow) {
+        console.log(`[Main Process] Sending token to renderer: ${token.substring(0, 6)}...`);
+        mainWindow.webContents.send('github-token', token);
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      } else {
+        console.error('[Main Process] Token not found in callback URL or mainWindow is not available.');
+      }
+    } else {
+      console.log('[Main Process] Ignoring protocol URL with unexpected path:', parsedUrl.pathname);
     }
-
-   try {
-        const parsedUrl = new URL(protocolUrl);
-        // Check if the path matches what your Next.js app sends back
-        // e.g., devstudio://auth/callback?token=...
-        if(parsedUrl.pathname.includes('callback')) {
-           const token = parsedUrl.searchParams.get('token');
-            if (token && mainWindow) {
-                // Send token securely to the renderer process (the Next.js app)
-                console.log(`[Main Process] Sending token to renderer: ${token.substring(0,6)}...`);
-                mainWindow.webContents.send('github-token', token);
-                // Bring window to front
-                if (mainWindow.isMinimized()) mainWindow.restore();
-                mainWindow.focus();
-            } else {
-                 console.error('[Main Process] Token not found in callback URL or mainWindow is not available.');
-            }
-        } else {
-            console.log('[Main Process] Ignoring protocol URL with unexpected path:', parsedUrl.pathname);
-        }
-
-   } catch (e) {
-        console.error('[Main Process] Failed to parse protocol URL:', protocolUrl, e);
-   }
+  } catch (e) {
+    console.error('[Main Process] Failed to parse protocol URL:', protocolUrl, e);
+  }
 }
 
 // Standard window management
@@ -114,16 +112,13 @@ app.on('window-all-closed', function () {
 });
 
 app.on('activate', function () {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
 
-// IPC listener to trigger the login flow
+// GitHub login trigger
 ipcMain.on('login-github', (event) => {
-    console.log('[Main Process] Received login-github request. Opening external URL.');
-    // Open the Next.js login URL in the user's default browser
-    shell.openExternal(WEBSITE_LOGIN_URL);
+  console.log('[Main Process] Received login-github request. Opening external URL.');
+  shell.openExternal(WEBSITE_LOGIN_URL);
 });

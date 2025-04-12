@@ -431,6 +431,7 @@ export default function Home() {
                                          commitError={commitError}
                                          commitSuccess={commitSuccess}
                                          clearCommitError={clearCommitError}
+                                         accessToken={accessToken}
                                      />
                                  </div>
                              </div>
@@ -491,12 +492,11 @@ export default function Home() {
                 <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
                 <div className="flex flex-1 flex-col overflow-hidden">
                     <Topbar
+                        accessToken={accessToken}
                         userRepos={userRepos}
                         selectedRepo={selectedRepo}
                         setSelectedRepo={setSelectedRepo}
-                        userInfo={userInfo}
-                        isRepoListLoading={isRepoListLoading}
-                        
+                        userInfo={userInfo}                        
                     />
                     <div className="flex flex-1 overflow-hidden">
                         {renderTabContent()}

@@ -4,8 +4,11 @@ import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import Editor, { useMonaco } from '@monaco-editor/react';
 import { FiLoader, FiAlertCircle, FiCode, FiX, FiSave, FiCheckCircle } from 'react-icons/fi';
 import { callGeminiForEdit } from '../hooks/geminiUtils';
+import Terminal from './Terminal'; // Make sure this import is correct
 
+// ... (getLanguageForMonaco remains the same)
 const getLanguageForMonaco = (filename) => {
+    // ... (implementation is correct)
     if (!filename) return 'plaintext';
     const extension = filename.split('.').pop()?.toLowerCase();
     switch (extension) {
@@ -33,7 +36,9 @@ const getLanguageForMonaco = (filename) => {
     }
 };
 
+// ... (PromptInput remains the same)
 const PromptInput = ({ isOpen, onClose, onSubmit, prompt, setPrompt, isLoading, error, position }) => {
+    // ... (implementation is correct)
     const inputRef = useRef(null);
 
     useEffect(() => {
@@ -118,7 +123,8 @@ const CodeDisplay = ({
     isCommitting,
     commitError,
     commitSuccess,
-    clearCommitError
+    clearCommitError,
+    accessToken
 }) => {
 
     const monaco = useMonaco();
@@ -140,6 +146,7 @@ const CodeDisplay = ({
     const [isGeminiLoading, setIsGeminiLoading] = useState(false);
     const [geminiError, setGeminiError] = useState(null);
     const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
+    const [isTerminalOpen, setIsTerminalOpen] = useState(false); // State for terminal
 
     useEffect(() => {
         const key = process.env.NEXT_PUBLIC_GEMINI_API;
@@ -178,15 +185,18 @@ const CodeDisplay = ({
             setEditorContent('');
             setIsDirty(false);
         }
-    }, [fileContent, selectedFile?.path, selectedFile?.sha]);
+        // Only run when fileContent or selectedFile identity changes
+    }, [fileContent, selectedFile?.path, selectedFile?.sha]); // editorContent removed from deps
 
     const handleEditorChange = useCallback((value) => {
         const currentVal = value ?? '';
-        setEditorContent(currentVal);
+        setEditorContent(currentVal); // Update internal state
 
+        // Determine dirtiness based on comparison with the original fetched content
         if (!commitSuccess && !isCommitting) {
-             setIsDirty(currentVal !== fileContent);
+            setIsDirty(currentVal !== fileContent);
         }
+
         if (commitError) clearCommitError?.();
         if (geminiError) setGeminiError(null);
 
@@ -221,16 +231,19 @@ const CodeDisplay = ({
     const handleOpenPromptInput = useCallback(() => {
         if (isApiKeyMissing) {
              setGeminiError("Gemini API key is missing or invalid. Please configure NEXT_PUBLIC_GEMINI_API.");
-             setIsPromptInputOpen(true);
+             // Position the error message somewhere visible even if editor isn't fully loaded
              setPromptPosition({top: 20, left: 20});
+             setIsPromptInputOpen(true); // Open the input to show the error
              return;
         }
-        if (!editorRef.current || !editorContainerRef.current) return;
+        if (!editorRef.current || !monaco) return; // Ensure monaco is available
 
         const editor = editorRef.current;
         const selection = editor.getSelection();
 
         if (!selection || selection.isEmpty()) {
+            // Optionally provide feedback that a selection is needed
+            console.log("Please select text to edit with AI.");
             return;
         }
 
@@ -240,32 +253,52 @@ const CodeDisplay = ({
         setPromptInput('');
         setGeminiError(null);
 
+        // Calculate position more reliably
         const startLineNumber = selection.startLineNumber;
         const startColumn = selection.startColumn;
         const editorLayout = editor.getLayoutInfo();
-        const visiblePos = editor.getScrolledVisiblePosition({ lineNumber: startLineNumber, column: startColumn });
+
+        // Get the position of the top-left corner of the selection in the viewport
+        const contentWidgetPosition = editor.getScrolledVisiblePosition({ lineNumber: startLineNumber, column: startColumn });
+
+        if (!contentWidgetPosition) return; // Cannot calculate position if selection is off-screen
 
         const estimatedLineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-        let top = visiblePos.top + estimatedLineHeight;
-        let left = visiblePos.left;
+        let top = contentWidgetPosition.top + estimatedLineHeight; // Position below the start line
+        let left = contentWidgetPosition.left; // Position at the start column
 
-        const promptWidthEstimate = 500;
-        const promptHeightEstimate = 90;
+        // Adjust position to keep the prompt within the editor bounds
+        const promptWidthEstimate = 500; // Approx width of the prompt input
+        const promptHeightEstimate = 100; // Approx height
 
-        if (left + promptWidthEstimate > editorLayout.width - 10) {
-            left = editorLayout.width - promptWidthEstimate - 10;
+        if (left + promptWidthEstimate > editorLayout.width - 20) { // Check right boundary
+            left = Math.max(10, editorLayout.width - promptWidthEstimate - 20);
         }
-        if (left < 10) left = 10;
-
-        if (top + promptHeightEstimate > editorLayout.height - 10) {
-            top = visiblePos.top - promptHeightEstimate - 10;
-            if (top < 10) top = 10;
+        if (left < 10) { // Check left boundary
+            left = 10;
         }
+
+        if (top + promptHeightEstimate > editorLayout.height - 20) { // Check bottom boundary
+             // Try positioning above the selection instead
+             top = contentWidgetPosition.top - promptHeightEstimate - 5;
+             if (top < 10) { // If still too high, clamp to top
+                 top = 10;
+             }
+        }
+         if (top < 10) { // Ensure it doesn't go above the top viewport
+             top = 10;
+         }
+
 
         setPromptPosition({ top, left });
         setIsPromptInputOpen(true);
 
-    }, [monaco, isApiKeyMissing]);
+    }, [monaco, isApiKeyMissing]); // Include monaco in dependencies
+
+    // --- IMPROVED: handleOpenTerminal ---
+    const handleOpenTerminal = useCallback(() => {
+         setIsTerminalOpen(prev => !prev); // Toggle state
+    }, []); // No dependencies needed
 
     const handleClosePromptInput = useCallback(() => {
         setIsPromptInputOpen(false);
@@ -273,30 +306,32 @@ const CodeDisplay = ({
         setSelectedTextForPrompt('');
         setSelectionRange(null);
         setPromptPosition(null);
+        setGeminiError(null); // Clear error on close
         if (editorRef.current) {
+             // Short delay helps ensure focus works correctly after state updates
              setTimeout(() => editorRef.current?.focus(), 0);
         }
     }, []);
 
-    // --- UPDATED handlePromptSubmit ---
+    // --- handlePromptSubmit remains mostly the same, ensure editor checks ---
     const handlePromptSubmit = useCallback(async () => {
         if (isApiKeyMissing) {
             setGeminiError("Gemini API key is missing or invalid.");
             return;
         }
-        if (!promptInput || !selectionRange || !selectedTextForPrompt) {
-             setGeminiError("Missing data for AI edit.");
+        if (!promptInput || !selectionRange || selectedTextForPrompt === null || selectedTextForPrompt === undefined) {
+             setGeminiError("Missing data for AI edit (selection or prompt).");
              return;
         }
         const editor = editorRef.current;
-        if (!editor || !editor.getModel()) {
-            setGeminiError("Editor is not available.");
-            return; // Guard against editor not being ready
+        // Robust check for editor and model
+        if (!editor || typeof editor.getModel !== 'function' || !editor.getModel()) {
+            setGeminiError("Editor is not ready or model is unavailable.");
+            return;
         }
 
         setIsGeminiLoading(true);
         setGeminiError(null);
-
 
         try {
             const modifiedCode = await callGeminiForEdit(
@@ -305,47 +340,43 @@ const CodeDisplay = ({
                 language
             );
 
-            // 1. Apply the edit to the internal model
+            const model = editor.getModel();
+
+            // Apply the edit
             editor.executeEdits('gemini-ai-edit', [{
                 range: selectionRange,
                 text: modifiedCode,
-                forceMoveMarkers: true
+                forceMoveMarkers: true // Important for subsequent edits/selections
             }]);
 
-            // 2. Read the *full* updated content back from the model
-            const fullNewContent = editor.getModel().getValue();
+            // Get the *new* full content AFTER the edit is applied
+            const newFullContent = model.getValue();
 
-            // 3. Update React state ONLY IF the content actually changed
-            if (editorContent !== fullNewContent) {
-                setEditorContent(fullNewContent);
-                setIsDirty(fullNewContent !== fileContent); // Compare with original
 
-                // 4. FORCE REFRESH: Reset the model value *after* state update cycle
-                setTimeout(() => {
-                    // Check if editor and model still exist (component might unmount quickly)
-                    if (editorRef.current && editorRef.current.getModel()) {
-                         // Check if model value differs from state (optional safety)
-                         if (editorRef.current.getModel().getValue() !== fullNewContent) {
-                            console.log("Forcing editor model value reset."); // Debug log
-                            editorRef.current.getModel().setValue(fullNewContent);
-                         }
-                    }
-                }, 0); // setTimeout 0 pushes execution to the end of the event loop queue
-
+            // Update React state only if the content actually changed
+            // This prevents unnecessary re-renders and potential loops
+            if (newFullContent !== editorContent) {
+                 setEditorContent(newFullContent); // Update state with the content from the model
+                 setIsDirty(newFullContent !== fileContent); // Check dirtiness against original
             } else {
-                 // Content didn't change after edit/readback (maybe Gemini returned identical code)
-                 // Still close the prompt if it was just an identical return
-                 console.log("Model value matches current state after edit, skipping state update.");
+                console.log("Gemini edit resulted in identical content. State not updated.");
             }
 
-            handleClosePromptInput(); // Close prompt on success
+            // Close prompt after successful execution
+            handleClosePromptInput();
 
         } catch (error) {
             console.error("Gemini edit failed:", error);
-            setGeminiError(error.message || "An unknown error occurred during AI edit.");
-            // Do not close prompt on error
+            // Provide more specific error if possible
+            const message = error instanceof Error ? error.message : "An unknown error occurred during AI edit.";
+            setGeminiError(message);
+            // Do not close prompt on error, let the user see the error message
         } finally {
             setIsGeminiLoading(false);
+            // Re-focus editor after operation, unless prompt stays open due to error
+            if (!geminiError && editorRef.current) {
+                setTimeout(() => editorRef.current?.focus(), 0);
+            }
         }
     }, [
         promptInput,
@@ -353,31 +384,43 @@ const CodeDisplay = ({
         selectedTextForPrompt,
         language,
         handleClosePromptInput,
-        fileContent, // Original content for dirty check
-        editorContent, // Current state content for comparison
-        isApiKeyMissing
+        fileContent,
+        editorContent, // Current React state content
+        isApiKeyMissing,
+        geminiError // Added to dependencies for the finally block focus logic
     ]);
-    // --- END UPDATED handlePromptSubmit ---
 
     const handleEditorDidMount = useCallback((editor, monacoInstance) => {
         editorRef.current = editor;
 
+        // Save command (Ctrl/Cmd + S)
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyS, () => {
             handleSaveClick();
         });
 
+        // AI Edit command (Ctrl/Cmd + K)
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyK, () => {
              handleOpenPromptInput();
         });
 
+        // Toggle Terminal command (Ctrl/Cmd + J)
+        editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyJ, () => {
+            handleOpenTerminal();
+       });
+
+        // Focus the editor when it mounts
         editor.focus();
-    }, [handleSaveClick, handleOpenPromptInput]); // Keep dependencies
+
+    }, [handleSaveClick, handleOpenPromptInput, handleOpenTerminal]); // Added handleOpenTerminal
 
 
     return (
         <>
+            {/* Container for both Editor and Terminal */}
             <div className="flex flex-1 flex-col bg-white dark:bg-gray-900 overflow-hidden">
+                 {/* Top Bar */}
                  <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-shrink-0 min-h-[41px] space-x-2">
+                    {/* File Info and Status */}
                     {selectedFile ? (
                         <>
                             <div className="flex items-center space-x-2 overflow-hidden flex-1 min-w-0">
@@ -387,12 +430,13 @@ const CodeDisplay = ({
                                     title={filePath}
                                 >
                                     {fileName}
-                                    {isDirty && !isCommitting ? '*' : ''}
+                                    {isDirty && !isCommitting && !commitSuccess ? '*' : ''} {/* Show * only when dirty and not just committed */}
                                 </span>
                                 <span className="text-xs text-gray-500 dark:text-gray-400 truncate hidden sm:inline">
                                     ({filePath})
                                 </span>
 
+                                {/* Status Indicators */}
                                 {isLoading && <FiLoader title="Loading file content..." className="animate-spin text-blue-500 dark:text-blue-400 flex-shrink-0 ml-2" size={16} />}
                                 {isCommitting && <FiLoader title="Commit in progress..." className="animate-spin text-green-500 dark:text-green-400 flex-shrink-0 ml-2" size={16} />}
                                 {commitSuccess && !isCommitting && <FiCheckCircle title="Commit successful!" className="text-green-500 dark:text-green-400 flex-shrink-0 ml-2" size={16} />}
@@ -410,17 +454,18 @@ const CodeDisplay = ({
                                     </div>
                                 )}
                                 {isGeminiLoading && <FiLoader title="AI processing..." className="animate-spin text-purple-500 dark:text-purple-400 flex-shrink-0 ml-2" size={16} />}
-                                {isApiKeyMissing && !isPromptInputOpen && <FiAlertCircle title="Gemini API key missing or invalid!" className="text-orange-500 dark:text-orange-400 flex-shrink-0 ml-2" size={16} />}
+                                {isApiKeyMissing && !isPromptInputOpen && <FiAlertCircle title="Gemini API key missing or invalid! Press Cmd/Ctrl+K to see details." className="text-orange-500 dark:text-orange-400 flex-shrink-0 ml-2" size={16} />}
                             </div>
 
+                            {/* Action Buttons */}
                             <div className="flex items-center flex-shrink-0 space-x-1">
-                                {isDirty && !isCommitting && (
+                                {isDirty && !isCommitting && !commitSuccess && ( // Hide save if just successfully committed
                                     <button
                                         onClick={handleSaveClick}
-                                        title="Save changes (Commit to GitHub)"
+                                        title="Save changes (Commit to GitHub - Ctrl/Cmd+S)"
                                         aria-label="Save changes"
                                         className="p-1 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                                        disabled={!isDirty || isCommitting || isGeminiLoading || isPromptInputOpen}
+                                        disabled={!isDirty || isCommitting || isGeminiLoading || isPromptInputOpen || !!fileError}
                                     >
                                         <FiSave size={16} />
                                     </button>
@@ -437,45 +482,53 @@ const CodeDisplay = ({
                             </div>
                         </>
                     ) : (
-                        <span className="text-sm text-gray-500 dark:text-gray-400 px-2 [.dark_&]:text-white">
+                         // Placeholder when no file is selected
+                        <span className="text-sm text-gray-500 dark:text-gray-400 px-2">
                             Select a file to view its content.
                         </span>
                     )}
                 </div>
 
-                <div ref={editorContainerRef} className="flex-1 overflow-hidden relative bg-gray-100 dark:bg-gray-800">
+                 {/* Editor Area */}
+                 <div ref={editorContainerRef} className="flex-1 relative overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      {/* Loading Overlay */}
                      {isLoading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-white/30 dark:bg-gray-900/30 z-10">
-                            <div className="flex flex-col items-center p-4 rounded bg-gray-200/80 dark:bg-gray-700/80 shadow">
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10 backdrop-blur-sm">
+                            <div className="flex flex-col items-center p-4 rounded bg-gray-200/90 dark:bg-gray-700/90 shadow-md">
                                 <FiLoader className="animate-spin text-blue-600 dark:text-blue-400 mb-2" size={24} />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">Loading content...</span>
                             </div>
                         </div>
                     )}
+                     {/* File Error Display */}
                      {fileError && !isLoading && (
                         <div className="m-4 p-3 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-600 rounded-md text-red-700 dark:text-red-300 text-sm flex items-start space-x-2 break-words">
                             <FiAlertCircle size={18} className="flex-shrink-0 mt-0.5" />
                             <span>Error loading file: {fileError}</span>
                         </div>
                     )}
+                     {/* No File Selected Placeholder */}
                      {!selectedFile && !isLoading && !fileError && (
-                        <div className="[.dark_&]:text-white [.dark_&]:bg-gray-800 flex flex-1 flex-col items-center justify-center h-full p-6 text-gray-500 dark:text-gray-400">
+                        <div className="flex flex-1 flex-col items-center justify-center h-full p-6 text-gray-500 dark:text-gray-400">
                             <FiCode size={48} className="mb-4 opacity-50" />
                             <p>Select a file from the list on the left to edit.</p>
+                            <p className="text-xs mt-2">(Use <kbd className="px-1 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">Cmd/Ctrl+K</kbd> to edit selection with AI)</p>
+                            <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">Cmd/Ctrl+J</kbd> to toggle Terminal)</p>
                         </div>
                     )}
 
+                     {/* Monaco Editor Instance */}
                     {selectedFile && !fileError && (
                         <Editor
-                            key={filePath}
-                            height="100%"
+                            key={filePath} // Ensures editor remounts on file change
+                            height="100%" // Takes full height of its container
                             language={language}
                             theme={editorTheme}
-                            value={editorContent}
+                            value={editorContent} // Controlled component
                             options={editorOptions}
                             onChange={handleEditorChange}
                             onMount={handleEditorDidMount}
-                            loading={
+                            loading={ // Loading indicator for the editor itself
                                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
                                    <FiLoader className="animate-spin text-blue-500 mr-2" size={20} />
                                    Loading Editor...
@@ -484,6 +537,7 @@ const CodeDisplay = ({
                         />
                     )}
 
+                    {/* AI Prompt Input - Absolute Positioned */}
                     <PromptInput
                         isOpen={isPromptInputOpen}
                         onClose={handleClosePromptInput}
@@ -492,9 +546,10 @@ const CodeDisplay = ({
                         setPrompt={setPromptInput}
                         isLoading={isGeminiLoading}
                         error={geminiError}
-                        position={promptPosition}
+                        position={promptPosition} // Calculated position
                     />
 
+                     {/* Global AI Loading Indicator (when prompt is not open) */}
                      {isGeminiLoading && !isPromptInputOpen && (
                          <div className="absolute bottom-4 right-4 flex items-center p-2 rounded bg-white/80 dark:bg-gray-800/80 shadow-md border border-gray-300 dark:border-gray-600 z-20">
                              <FiLoader className="animate-spin text-purple-600 dark:text-purple-400 mr-2" size={16} />
@@ -502,6 +557,15 @@ const CodeDisplay = ({
                          </div>
                      )}
                 </div>
+
+                 
+                 {isTerminalOpen && (
+                     <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 h-48 md:h-64">
+                         {/* You might want a container with specific height */}
+                         <Terminal repoUrl={"https://github.com/Raahim2/DevStudio"} accessToken={accessToken}/>
+                     </div>
+                 )}
+
             </div>
         </>
     );

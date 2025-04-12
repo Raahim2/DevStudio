@@ -7,10 +7,10 @@ import { PlaceholdersAndVanishInput } from "../../components/placeholders-and-va
 import { TextHoverEffect } from "../../components/text-hover-effect";
 import { Features } from "../../components/features-section";
 import SectionStart from "../../components/section-start";
-import { Tabs } from "../../components/tabs";
+// import { Tabs } from "../../components/tabs";
 import { MacbookScroll } from "../../components/macbook";
 import FAQ from '../../components/faq';
-import GetStartedSection from '../components/get-started-section'; // <-- Import the new component
+import GetStartedSection from '../../components/getstarted';
 import './globals.css';
 
 export default function HomePage() {
@@ -97,18 +97,14 @@ export default function HomePage() {
         <title>DevStudio - AI-Powered Development</title>
         <meta name="description" content="DevStudio is an AI-powered platform for smarter, faster development." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* <link rel="icon" href="/favicon.ico" /> */}
       </Head>
 
       {/* --- Outer Container --- */}
-      {/* Removed horizontal padding from here, let sections manage their own if needed */}
       <div className="relative flex flex-col min-h-screen w-full bg-white text-gray-800 dark:bg-black dark:text-neutral-200 overflow-x-hidden transition-colors duration-300">
         <Navbar />
 
         {/* --- Hero Section --- */}
-        {/* Added px-4 sm:px-6 lg:px-8 here for hero content */}
         <main className="flex flex-grow flex-col items-center justify-center pt-28 sm:pt-32 pb-16 md:pb-24 text-center px-4 sm:px-6 lg:px-8">
-          {/* ... (rest of hero content: TextHoverEffect, Input, Paragraph, Buttons) */}
            <div className="mb-10 md:mb-12 w-[60vw] sm:w-[50vw] h-[25vh] sm:h-[30vh]">
             <TextHoverEffect text="DevStudio" duration={0.5} />
           </div>

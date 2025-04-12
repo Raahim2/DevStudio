@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "../../components/themeprovider"
 import Footer from "../../components/footer"
 
 export default function RootLayout({ children }) {
