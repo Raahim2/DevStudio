@@ -1,36 +1,51 @@
-# DevStudio - Your Ultimate Code Editing Platform
+# DevStudio - AI-Powered GitHub-Based Code Editing Platform
 
-Welcome to **DevStudio**, the next-generation code editing platform designed to empower developers with seamless coding experiences. Whether you're a beginner or a seasoned professional, DevStudio has everything you need to bring your ideas to life.
+![DevStudio Logo](LOGO/Devstdio.png)
 
-## 🚀 Features
+[![Electron.js](https://img.shields.io/badge/Electron.js-47848F?style=flat&logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/)
+[![Visual Studio Code](https://img.shields.io/badge/VSCode-0078D4?style=flat&logo=visual-studio-code&logoColor=white)](https://code.visualstudio.com/)
 
-- **Intuitive Code Editor**: A clean, fast, and responsive editor with syntax highlighting and auto-completion.
-- **Multi-Language Support**: Write code in multiple programming languages effortlessly.
-- **Real-Time Collaboration**: Work with your team in real-time with live editing and commenting.
-- **Customizable Themes**: Personalize your workspace with a variety of themes and layouts.
-- **Integrated Debugging**: Debug your code directly within the platform.
-- **Cloud Sync**: Access your projects from anywhere with secure cloud storage.
+## 📝 Overview
 
-## 🌟 Why Choose DevStudio?
+DevStudio is a cutting-edge, GitHub-integrated code editing platform designed to enhance developer productivity with AI-powered features. Whether you're working solo or collaborating with a team, DevStudio provides the tools you need to code smarter and faster.
 
-- **User-Friendly Interface**: Designed for productivity and ease of use.
-- **Cross-Platform**: Available on Windows, macOS, and Linux.
-- **Community-Driven**: Join a vibrant community of developers and share your knowledge.
-- **Secure and Reliable**: Your code and data are safe with us.
+## 🎥 Demo
 
-## 📥 Get Started
+Check out the demo video to see DevStudio in action: [Watch Demo](https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4)
 
-1. **Sign Up**: Create your free account on [DevStudio](#).
-2. **Download**: Install the app for your preferred platform.
-3. **Start Coding**: Begin your coding journey with DevStudio today!
+## ✨ Key Features
+### AI-Powered Code Editing
+- 🤖 **AI Code Suggestions**: Get intelligent code completions and refactoring suggestions.
+- 🧠 **Error Detection**: Identify and fix bugs in real-time with AI-driven insights.
+- 📚 **Code Optimization**: Automatically optimize your code for better performance.
+- 📊 **GitHub Insights**: Leverage AI to analyze repository trends and suggest improvements.
+- 🔄 **Automated Code**: Automatically generate pull requests for code fixes and enhancements.
+- 🛡️ **Security Scanning**: Detect vulnerabilities in your codebase with AI-powered GitHub integration.
 
-## 📚 Documentation
+### Collaboration Tools
+- 🛠️ **Vibe Coding**: Collaborate with teammates in real-time with live editing and chat.
+- 💬 **Code Reviews**: Streamline pull requests with AI-assisted code review suggestions.
+- 🔄 **Version Control**: Seamlessly integrate with GitHub for branch management and commits.
 
-For detailed guides and tutorials, visit our [Documentation](#).
+### Automation & Customization
+- ⚙️ **Git Automation**: Automate repetitive Git tasks like merging, rebasing, and tagging.
+- 🎨 **Customizable Themes**: Personalize your workspace with a variety of themes and layouts.
+- 📂 **Project Templates**: Start coding faster with pre-configured project templates.
 
-## 💬 Support
 
-Need help? Reach out to our support team at [support@DevStudio.com](mailto:support@DevStudio.com).
+
+## 🙏 Acknowledgments
+
+- [NextJS](https://nextjs.org/)
+- [Node.js](https://nodejs.org/)
+- [GitHub](https://github.com/)
+- [Docker](https://www.docker.com/)
 
 ---
 
