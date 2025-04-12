@@ -1,6 +1,6 @@
 # DevStudio - AI-Powered GitHub-Based Code Editing Platform
 
-![DevStudio Logo](LOGO/Devstdio.png)
+![DevStudio Logo](LOGO/DevStudioLogo.png)
 
 [![Electron.js](https://img.shields.io/badge/Electron.js-47848F?style=flat&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
