@@ -4,11 +4,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '../../components/Sidebar';
 import FileBar from '../../components/FileBar';
 import Topbar from '../../components/Topbar';
-import ChatSection from '../../components/ChatSection';
+import ChatSection from '../../components/c2c';
 import Bottombar from '../../components/Bottombar';
 import HomeTabContent from '../../components/HomeTabContent';
 import CodeDisplay from '../../components/CodeDisplay';
-import CommitModal from '../../components/CommitModal';
 import { FiLoader } from 'react-icons/fi';
 import { useGitHubApi } from '../../hooks/useGitHubApi';
 import RepoScanner from '../../components/RepoScanner'; // Corrected path assuming it's in components
@@ -40,14 +39,9 @@ export default function Home() {
     const [isFileLoading, setIsFileLoading] = useState(false);
     const [fileError, setFileError] = useState(null);
     const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
-    const [fileToCommit, setFileToCommit] = useState(null);
     const prevRepoIdRef = useRef(null);
 
     const {
-        commitCode,
-        isCommitting,
-        commitError,
-        commitSuccess,
         clearCommitError
     } = useGitHubApi(accessToken, selectedRepo?.full_name);
 
@@ -59,7 +53,6 @@ export default function Home() {
             setIsFileLoading(false);
             clearCommitError();
             setIsCommitModalOpen(false);
-            setFileToCommit(null);
         }
     }, [selectedFile, fileContent, fileError, isFileLoading, isCommitModalOpen, clearCommitError]);
 
@@ -88,7 +81,6 @@ export default function Home() {
         }
     }, [clearAuthState]);
 
-    // --- useEffect hooks remain unchanged ---
     useEffect(() => {
         let unsubscribe = null;
         let cleanupPerformed = false;
@@ -224,9 +216,7 @@ export default function Home() {
     const handleFileSelect = useCallback((file) => {
         // Allow selecting a file path string directly (from RepoScanner)
         if (typeof file === 'string') {
-             // We only have the path, need to potentially fetch SHA later or handle differently
-             // For now, let's just set the path and clear content. Assume CodeDisplay/ChatSection
-             // might need refetching based on path alone if SHA isn't available.
+            
              if (selectedFile?.path === file) return; // Avoid re-selecting same path
              setSelectedFile({ path: file, name: file.split('/').pop(), sha: null }); // Create a partial file object
              setFileContent(null);
@@ -234,7 +224,6 @@ export default function Home() {
              setIsFileLoading(false); // Don't set loading=true as we don't have SHA to fetch yet
              clearCommitError();
              setIsCommitModalOpen(false);
-             setFileToCommit(null);
              return; // Exit early
         }
 
@@ -249,7 +238,6 @@ export default function Home() {
             setIsFileLoading(true);
             clearCommitError();
             setIsCommitModalOpen(false);
-            setFileToCommit(null);
         } else {
             console.warn("Page: Invalid file object received for selection:", file);
             handleClearFile();
@@ -272,72 +260,8 @@ export default function Home() {
         }
     }, [selectedFile]);
 
-    const handleInitiateSave = useCallback((fileDetails, currentContent) => {
-        if (!fileDetails || currentContent === null || currentContent === undefined) return;
-        if (isCommitting) return;
-        if (!selectedRepo || !accessToken) {
-            setRepoListError("Cannot save: Repository context or authentication missing.");
-            return;
-        }
-        // Crucial: Need the *latest* SHA for committing.
-        // If RepoScanner just passed a path, selectedFile.sha might be null/stale.
-        // This suggests FileBar needs to be the source of truth for SHA before saving.
-        // Or RepoScanner needs to provide the SHA, which is unlikely.
-        // For now, assume saving is primarily initiated from CodeDisplay where selectedFile has a SHA.
-        if (!fileDetails.sha) {
-             setFileError("Cannot save: File information (SHA) is missing. Please select the file from the file tree first.");
-             setIsCommitModalOpen(false);
-             return;
-        }
 
-        clearCommitError();
-        setRepoListError(null);
-        setFileToCommit({ file: fileDetails, content: currentContent });
-        setIsCommitModalOpen(true);
-    }, [accessToken, selectedRepo, isCommitting, clearCommitError, setFileError]); // Added setFileError dependency
-
-    const handleCommitSubmit = useCallback(async (commitMessage) => {
-        if (!fileToCommit?.file || !fileToCommit?.content || !commitMessage) {
-            setIsCommitModalOpen(false);
-            setFileToCommit(null);
-            return;
-        }
-        const { file, content } = fileToCommit;
-
-        // Add check for SHA before committing
-        if (!file.sha) {
-            console.error("Commit attempt failed: Missing file SHA.");
-            // Potentially set commitError state here
-            setIsCommitModalOpen(false);
-            setFileToCommit(null);
-            return;
-        }
-
-        const commitResult = await commitCode(content, commitMessage, file.path, file.sha);
-
-        if (commitResult.success) {
-            setFileContent(content);
-            if (commitResult.newSha) {
-                setSelectedFile(prevFile =>
-                    prevFile ? { ...prevFile, sha: commitResult.newSha } : null
-                );
-                // TODO: Consider telling FileBar to update its internal SHA for this file if necessary
-            } else {
-                console.warn("Page: Commit successful, but the new file SHA was not returned.");
-                // Might need a manual refresh of file tree or file content
-            }
-            setIsCommitModalOpen(false);
-            setFileToCommit(null);
-        }
-        // If commitResult.success is false, useGitHubApi hook should set commitError
-    }, [commitCode, fileToCommit, setFileContent, setSelectedFile]);
-
-    const handleCommitModalClose = useCallback(() => {
-        if (!isCommitting) {
-             setIsCommitModalOpen(false);
-             setFileToCommit(null);
-        }
-    }, [isCommitting]);
+   
 
     useEffect(() => {
         const currentRepoId = selectedRepo?.id;
@@ -347,11 +271,7 @@ export default function Home() {
         prevRepoIdRef.current = currentRepoId;
     }, [selectedRepo, handleClearFile]);
 
-    useEffect(() => {
-        if (isCommitModalOpen && activeTab !== 'Code' && activeTab !== 'Chat') {
-             handleCommitModalClose();
-        }
-    }, [activeTab, isCommitModalOpen, handleCommitModalClose]);
+
 
     // ************************************************
     // ********* RENDER TAB CONTENT - MODIFIED ********
@@ -410,30 +330,29 @@ export default function Home() {
                              <div className="flex-1 flex flex-col overflow-hidden">
                                  {/* Chat View (visible only if activeTab is 'Chat') */}
                                  <div style={{ display: activeTab === 'Chat' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
-                                      <ChatSection
-                                          key={selectedFile?.path ?? 'chat-no-file'}
+                                      {/* <ChatSection
                                           selectedRepoFullName={selectedRepo.full_name}
                                           accessToken={accessToken}
                                           selectedFile={selectedFile}
                                           selectedFileContent={fileContent}
                                           isLoading={isFileLoading}
                                           error={fileError}
+                                      /> */}
+
+                                        <ChatSection
+                                          selectedRepoFullName={selectedRepo.full_name}
+                                          accessToken={accessToken}
+                                          selectedFile={selectedFile}          
+                                          context={fileContent}                
+                                          onClearContext={handleClearFile}  
                                       />
                                   </div>
                                  {/* Code View (visible only if activeTab is 'Code') */}
                                  <div style={{ display: activeTab === 'Code' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
                                      <CodeDisplay
-                                         key={selectedFile?.path ?? 'code-no-file'}
                                          selectedFile={selectedFile}
-                                         fileContent={fileContent}
+                                         repoFullName={selectedRepo.full_name}
                                          onClearFile={handleClearFile}
-                                         isLoading={isFileLoading}
-                                         error={fileError}
-                                         onSave={handleInitiateSave}
-                                         isCommitting={isCommitting}
-                                         commitError={commitError}
-                                         commitSuccess={commitSuccess}
-                                         clearCommitError={clearCommitError}
                                          accessToken={accessToken}
                                      />
                                  </div>
@@ -507,15 +426,7 @@ export default function Home() {
                 </div>
             </div>
             <Bottombar />
-            {/* Commit Modal remains outside the tab content */}
-            <CommitModal
-                isOpen={isCommitModalOpen}
-                onClose={handleCommitModalClose}
-                onSubmit={handleCommitSubmit}
-                fileName={fileToCommit?.file?.name}
-                isCommitting={isCommitting}
-                commitError={commitError}
-            />
+            
         </div>
     );
 }

@@ -1,14 +1,25 @@
-// src/hooks/useGeminiChat.js
 import { useState, useCallback, useEffect, useRef } from 'react';
 
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API;
 const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest';
 const API_STREAM_GENERATE_CONTENT_URL = `${API_ENDPOINT_BASE}:streamGenerateContent`;
 
-const safetySettings = [ /* ... safety settings ... */ ];
-const generationConfig = { candidateCount: 1 };
+const safetySettings = [
+    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+];
 
-// Helper function inside the hook or imported
+const generationConfig = {
+    candidateCount: 1,
+    // stopSequences: [], // Add stop sequences if needed
+    // maxOutputTokens: 8192, // Adjust as needed, Flash supports up to 8192
+    // temperature: 1.0, // Adjust creativity (0.0 - 1.0+)
+    // topP: 0.95, // Adjust token sampling (0.0 - 1.0)
+    // topK: 40, // Adjust token sampling
+};
+
 const formatHistoryForAPI = (history) => {
     return history
         .filter(msg => msg.role === 'user' || msg.role === 'model')
@@ -18,19 +29,17 @@ const formatHistoryForAPI = (history) => {
         }));
 };
 
-
 export const useGeminiChat = (initialHistory = []) => {
     const [chatHistory, setChatHistory] = useState(initialHistory);
     const [isSending, setIsSending] = useState(false);
-    const [error, setError] = useState(null); // Errors related to Gemini API
+    const [error, setError] = useState(null);
     const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
     const abortControllerRef = useRef(null);
-    const contextAddedForPathRef = useRef(null); // Keep track of context prepending
+    const contextAddedForPathRef = useRef(null);
 
-    // Check API Key
     useEffect(() => {
         if (!API_KEY || API_KEY === 'YOUR_GEMINI_API_KEY' || API_KEY.trim() === '') {
-            setError("Gemini API key not found. Set NEXT_PUBLIC_GEMINI_API.");
+            setError("Gemini API key not found. Set NEXT_PUBLIC_GEMINI_API environment variable.");
             setIsApiKeyMissing(true);
         } else {
             setIsApiKeyMissing(false);
@@ -38,33 +47,44 @@ export const useGeminiChat = (initialHistory = []) => {
                 setError(null);
             }
         }
-        return () => { abortControllerRef.current?.abort(); }; // Cleanup on unmount
+        return () => { abortControllerRef.current?.abort(); };
      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // Run once on mount
+    }, []);
 
-     // Effect to handle file context changes signaled from parent
      const setFileContext = useCallback((selectedFile) => {
           const currentFilePath = selectedFile?.path;
+          const currentFileName = selectedFile?.name ?? 'Provided Context';
+
           if (currentFilePath) {
               if (contextAddedForPathRef.current !== currentFilePath) {
-                   console.log(`Hook: File context changed to: ${currentFilePath}`);
-                   setChatHistory([]); // Clear history on context change
+                   console.log(`Hook: Context changed/set to: ${currentFilePath} (Name: ${currentFileName})`);
                    setError(null);
-                   contextAddedForPathRef.current = null; // Reset flag
-                   // Add system message via setChatHistory
-                   setChatHistory([{ id: `system-${Date.now()}`, role: 'system', text: `Context: **${selectedFile.name}**`}]);
+                   contextAddedForPathRef.current = null;
+                   setChatHistory(prevHistory => [
+                       ...prevHistory,
+                       {
+                           id: `system-${Date.now()}`,
+                           role: 'system',
+                           text: `Context updated: **${currentFileName}**`
+                       }
+                   ]);
+              } else {
+                   console.log("Hook: Context set, but path is the same. No history change.");
               }
           } else {
                if (contextAddedForPathRef.current !== null) {
-                    console.log("Hook: File context cleared.");
+                    console.log("Hook: Context cleared.");
                     contextAddedForPathRef.current = null;
-                    // Optionally clear history or add system message
-                    // setChatHistory([]);
+                    // Optionally add system message for context removal
+                    // setChatHistory(prevHistory => [
+                    //     ...prevHistory,
+                    //     { id: `system-${Date.now()}`, role: 'system', text: `Context removed.` }
+                    // ]);
                }
           }
-     }, []); // Return this function
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+     }, []);
 
-    // The core message sending logic
     const sendMessage = useCallback(async (userQuery, selectedFile, selectedFileContent) => {
         if (!userQuery || isSending || isApiKeyMissing) {
             console.warn("Hook: Send message blocked.", { isSending, isApiKeyMissing });
@@ -77,18 +97,17 @@ export const useGeminiChat = (initialHistory = []) => {
         const userMessageId = `user-${Date.now()}`;
         const modelMessageId = `model-${Date.now()}`;
 
-        // Context Prepending Logic
         const shouldPrependContext = selectedFile && selectedFileContent && contextAddedForPathRef.current !== selectedFile.path;
         let textToSendToApi = userQuery;
         if (shouldPrependContext) {
-            const fileHeader = `--- File Context: ${selectedFile.name} (${selectedFile.path}) ---\n\n`;
-            const fileFooter = "\n\n--- End File Context ---";
-            const maxContextLength = 15000;
+            const fileHeader = `--- Context: ${selectedFile.name} ---\n\n`; // Simplified header
+            const fileFooter = "\n\n--- End Context ---";
+            const maxContextLength = 15000; // Adjust based on token limits and typical context size
             const truncatedContent = selectedFileContent.length > maxContextLength
                 ? selectedFileContent.substring(0, maxContextLength) + "\n... (truncated) ..."
                 : selectedFileContent;
             textToSendToApi = `${fileHeader}${truncatedContent}${fileFooter}\n\nMy question:\n${userQuery}`;
-            contextAddedForPathRef.current = selectedFile.path; // Mark context as sent
+            contextAddedForPathRef.current = selectedFile.path;
             console.log(`Hook: Prepending context for ${selectedFile.path}`);
         } else {
              console.log("Hook: Sending query without prepended context.");
@@ -99,7 +118,6 @@ export const useGeminiChat = (initialHistory = []) => {
         const requestBody = { contents: [...previousMessagesForApi, currentUserApiPart], safetySettings, generationConfig };
         const fullApiUrl = `${API_STREAM_GENERATE_CONTENT_URL}?key=${API_KEY}&alt=sse`;
 
-        // Update UI immediately
         const newUserMessageForDisplay = { id: userMessageId, role: 'user', text: userQuery };
         setChatHistory(prev => [...prev, newUserMessageForDisplay, { id: modelMessageId, role: 'model', text: '' }]);
 
@@ -108,19 +126,18 @@ export const useGeminiChat = (initialHistory = []) => {
         try {
             const response = await fetch(fullApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody), signal: abortControllerRef.current.signal });
 
-            if (!response.ok) { /* ... Gemini API error handling (same as before) ... */
-                 let errorData; try { errorData = await response.json(); } catch (e) {}
+            if (!response.ok) {
+                let errorData; try { errorData = await response.json(); } catch (e) {}
                 const errorDetails = errorData?.error?.message || `API Error: ${response.status} ${response.statusText}`;
                 if (response.status === 400 && errorDetails.includes("API key not valid")) throw new Error("Invalid Gemini API Key.");
                 if (response.status === 403) throw new Error("Gemini API Key lacks permission.");
-                if (response.status === 429) throw new Error("API Rate Limit Exceeded.");
-                if (response.status === 400 && errorDetails.toLowerCase().includes('request payload size')) throw new Error("Request size limit exceeded.");
-                if (response.status === 400 && errorDetails.toLowerCase().includes('user location')) throw new Error("API access restricted for region.");
+                if (response.status === 429) throw new Error("API Rate Limit Exceeded. Please wait and try again.");
+                if (response.status === 400 && errorDetails.toLowerCase().includes('request payload size')) throw new Error("Request size limit exceeded. Try a shorter query or context.");
+                if (response.status === 400 && errorDetails.toLowerCase().includes('user location')) throw new Error("API access restricted for your region.");
                 throw new Error(errorDetails);
             }
             if (!response.body) throw new Error("Response body stream missing.");
 
-            // Stream processing logic (same as before)
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let buffer = '';
@@ -142,11 +159,10 @@ export const useGeminiChat = (initialHistory = []) => {
                             if (chunkData.error) { streamError = `API error in stream: ${chunkData.error.message}`; break; }
                             const blockReason = chunkData.promptFeedback?.blockReason;
                             const finishReasonSafety = chunkData.candidates?.[0]?.finishReason === 'SAFETY';
-                            if (blockReason || finishReasonSafety) { streamError = `Content blocked by API: ${blockReason || "Safety Settings"}.`; break; }
+                            if (blockReason || finishReasonSafety) { streamError = `Content blocked by API: ${blockReason || "Safety Settings"}. Try rephrasing your query.`; break; }
                             const textChunk = chunkData.candidates?.[0]?.content?.parts?.[0]?.text;
                             if (typeof textChunk === 'string') {
                                 accumulatedText += textChunk;
-                                // Update history incrementally
                                 setChatHistory(prev => prev.map(msg => msg.id === modelMessageId ? { ...msg, text: accumulatedText } : msg ));
                             }
                         } catch (parseError) { console.warn("Stream parsing error:", parseError); }
@@ -161,26 +177,24 @@ export const useGeminiChat = (initialHistory = []) => {
             }
 
         } catch (err) {
-            if (shouldPrependContext) { contextAddedForPathRef.current = null; } // Reset if failed
-            setChatHistory(prev => prev.filter(msg => msg.id !== modelMessageId)); // Remove placeholder
+            if (shouldPrependContext) { contextAddedForPathRef.current = null; }
+            setChatHistory(prev => prev.filter(msg => msg.id !== modelMessageId));
             if (err.name === 'AbortError') { setError("Message generation cancelled."); }
             else { setError(err.message || "An unknown chat error occurred."); console.error("Chat Hook Error:", err); }
         } finally {
             setIsSending(false);
             abortControllerRef.current = null;
         }
-    }, [isSending, isApiKeyMissing, chatHistory, error]); // Dependencies for sendMessage
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSending, isApiKeyMissing, chatHistory, error]); // Removed explicit setError dependency as it's set within
 
-    // Function to stop generation
     const stopGenerating = useCallback(() => {
         if (isSending && abortControllerRef.current) {
             abortControllerRef.current.abort();
             console.log("Hook: Abort requested.");
-            // Note: isSending will be set to false in the finally block of sendMessage
         }
     }, [isSending]);
 
-     // Function to clear the error manually
      const clearError = useCallback(() => {
          setError(null);
      }, []);
@@ -193,6 +207,6 @@ export const useGeminiChat = (initialHistory = []) => {
         clearError,
         isApiKeyMissing,
         stopGenerating,
-        setFileContext, // Expose function to signal context change
+        setFileContext,
     };
 };

@@ -25,17 +25,17 @@ function createWindow() {
   mainWindow.loadURL(DEV_SERVER_URL);
 
   // Block Ctrl+Shift+I / Cmd+Opt+I to prevent DevTools opening
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    const isDevToolsShortcut =
-      (input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i';
+  // mainWindow.webContents.on('before-input-event', (event, input) => {
+  //   const isDevToolsShortcut =
+  //     (input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i';
 
-    if (isDevToolsShortcut) {
-      event.preventDefault();
-      console.log('[Main Process] Blocked DevTools shortcut');
-    }
-  });
+  //   if (isDevToolsShortcut) {
+  //     event.preventDefault();
+  //     console.log('[Main Process] Blocked DevTools shortcut');
+  //   }
+  // });
 
-  // mainWindow.webContents.openDevTools(); // Remove or comment out in production
+  mainWindow.webContents.openDevTools(); // Remove or comment out in production
 
   mainWindow.on('closed', function () {
     mainWindow = null;

@@ -38,12 +38,9 @@ const ChatSection = ({
         setFileContext: setGeminiFileContext, // Function to inform hook about file context changes
     } = useGeminiChat(); // Initialize with default empty history
 
-    // Hook for managing GitHub API interactions (like committing)
     const {
         commitCode,                // Function to commit code changes
-        isCommitting: isGitHubCommitting, // Boolean: Is a commit operation in progress?
-        commitError: gitHubCommitError,   // String: Error from GitHub commit, or null
-        commitSuccess: gitHubCommitSuccess, // Boolean: Was the last commit successful?
+        operationError: gitHubCommitError,   // String: Error from GitHub commit, or null
         clearCommitError: clearGitHubCommitError, // Function to clear GitHub commit error state
     } = useGitHubApi(accessToken, selectedRepoFullName); // Pass necessary arguments
 
@@ -160,11 +157,8 @@ const ChatSection = ({
                          codeString={codeString}
                          selectedRepoFullName={selectedRepoFullName}
                          selectedFile={selectedFile}
-                         // Pass the actual commit function from the useGitHubApi hook
                          onCommit={commitCode}
-                         // Pass the function to open the Create File modal
                          onCreateFile={handleShowCreateFileModal}
-                         {...props} // Pass down any other props
                      />
                  );
              }

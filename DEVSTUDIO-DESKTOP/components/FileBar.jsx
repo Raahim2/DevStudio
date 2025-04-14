@@ -533,6 +533,7 @@ const FileBar = ({ selectedRepo, onFileSelect, selectedFile, onFileContentLoaded
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100/50 dark:bg-gray-800/50 z-10">
                         <FiLoader size={24} className="animate-spin text-blue-500 dark:text-blue-400" />
                     </div>
+                    
                 )}
 
                 {/* --- Directory Fetch Error Message --- */}

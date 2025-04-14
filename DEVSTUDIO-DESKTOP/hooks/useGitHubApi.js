@@ -24,6 +24,7 @@ export const useGitHubApi = (accessToken, selectedRepoFullName) => {
     const [operationError, setOperationError] = useState(null);
     const [operationSuccess, setOperationSuccess] = useState(false); // Generic success state
 
+
     // --- Helper for API Calls ---
     const makeApiCall = useCallback(async (method, path, bodyData = null, operationVerb = 'operate') => {
         if (!selectedRepoFullName || !accessToken) {
@@ -174,6 +175,10 @@ export const useGitHubApi = (accessToken, selectedRepoFullName) => {
         setOperationError(null);
     }, []);
 
+    const clearCommitError = useCallback(() => {
+        setOperationError(null);
+    }, []);
+
     return {
         // State
         isOperating,        // Unified loading state for C/U/D operations
@@ -185,6 +190,7 @@ export const useGitHubApi = (accessToken, selectedRepoFullName) => {
         commitCode,         // Alias for update using createFileOrUpdate
         deleteFile,
         clearOperationError, // To manually clear errors
+        clearCommitError
 
         // You might expose createFileOrUpdate directly if preferred
         // createFileOrUpdate,
