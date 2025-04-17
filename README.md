@@ -1,6 +1,6 @@
 # DevStudio - AI-Powered GitHub-Based Code Editing Platform
 
-![DevStudio Logo](LOGO/DevStudioLogo.png)
+![DevStudioLogo-Dark](https://github.com/user-attachments/assets/38e7f407-130d-44f7-acba-7f003173aa9a)
 
 
 [![Electron.js](https://img.shields.io/badge/Electron.js-47848F?style=flat&logo=electron&logoColor=white)](https://www.electronjs.org/)
