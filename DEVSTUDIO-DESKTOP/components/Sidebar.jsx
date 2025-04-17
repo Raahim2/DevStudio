@@ -4,13 +4,12 @@ import {
   FiHome,
   FiMessageSquare,
   FiCode,
-  FiBell,
-  FiSettings,
   FiZap, // Using FiZap for Automation
   FiDownload,
   FiAlertCircle
-  
 } from 'react-icons/fi';
+
+import { FaChrome } from 'react-icons/fa';
 
 // Accept activeTab and setActiveTab as props
 const Sidebar = ({ activeTab, setActiveTab }) => {
@@ -19,9 +18,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { icon: FiHome, label: 'Home' },
     { icon: FiMessageSquare, label: 'Chat' },
     { icon: FiCode, label: 'Code' },
-    { icon: FiAlertCircle, label: 'Scanner' },
-    // { icon: FiSettings, label: 'Settings' },
+    { icon: FaChrome, label: 'Browser' },
     { icon: FiZap, label: 'Automation' },
+    { icon: FiAlertCircle, label: 'Scanner' },
   ];
 
   return (

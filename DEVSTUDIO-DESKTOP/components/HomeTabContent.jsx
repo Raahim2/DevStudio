@@ -226,9 +226,6 @@ const HomeTabContent = ({
                             placeholder="Search repositories..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                             // Applied [.dark_&]: variants for border, background, text
-                             // Placeholder styling requires specific pseudo-element targeting, often done via CSS or plugins.
-                             // Let's rely on browser defaults or add a specific class if needed.
                             className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 [.dark_&]:border-gray-600 rounded-md bg-gray-50 [.dark_&]:bg-gray-700 text-gray-900 [.dark_&]:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                         />
                         {/* Icon color adapted */}

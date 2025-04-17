@@ -22,7 +22,6 @@ const CodeBlock = ({
     const [showCommitInput, setShowCommitInput] = useState(false);
     const [isCreateFileModalOpen, setIsCreateFileModalOpen] = useState(false); // <-- State for modal visibility
 
-    console.log(selectedFile, "selectedFile in CodeBlock2 component"); // Keep for debugging commit if needed
     const {
         commitCode,
         isOperating: isCommitting,

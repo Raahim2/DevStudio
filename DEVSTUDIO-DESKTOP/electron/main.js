@@ -9,9 +9,7 @@ const INDEX_HTML_PATH = path.join(__dirname, '..', 'out', 'index.html');
 const LOCAL_HOST_URL = 'http://localhost:3000'; // Adjust this based on your dev server port
 
 // --- END CONFIGURATION ---
-
 let mainWindow;
-
 // Function to create window and load content
 function createWindow() {
   mainWindow = new BrowserWindow({

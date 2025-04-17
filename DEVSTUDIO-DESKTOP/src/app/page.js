@@ -12,13 +12,14 @@ import { FiLoader } from 'react-icons/fi';
 import { useGitHubApi } from '../../hooks/useGitHubApi';
 import RepoScanner from '../../components/RepoScanner'; 
 import AutomationTab from '../../components/Automation';
+import Browser from '../../components/Browser'; // Import the Browser component
 
 const GITHUB_ACCESS_TOKEN_KEY = 'github_access_token';
 
 const PlaceholderView = () => (
   <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
   <img
-    src="/logo.svg"
+    src="logo.svg"
     alt="No Repo Selected"
     className="w-[300px] h-[300px] mb-4 text-gray-500 opacity-50"
   />
@@ -332,7 +333,6 @@ export default function Home() {
                              <div className="flex-1 flex flex-col overflow-hidden">
                                  {/* Chat View (visible only if activeTab is 'Chat') */}
                                  <div style={{ display: activeTab === 'Chat' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
-                                    
                                         <ChatSection
                                           selectedRepoFullName={selectedRepo.full_name}
                                           accessToken={accessToken}
@@ -402,6 +402,12 @@ export default function Home() {
                      }
 
 
+                </div>
+
+
+                {/* --- Browser Tab --- */}
+                <div style={{ display: activeTab === 'Browser' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
+                    <Browser  /> {/* Replace with the desired URL */}
                 </div>
 
 
