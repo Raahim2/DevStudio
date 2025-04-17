@@ -8,7 +8,7 @@
     "next:dev": "next dev --turbopack",
     "electron:dev": "wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .",
     "build": "npm run next:build && npm run electron:build",
-    "next:build": "next build",
+    "next:build": "next build", 
     "electron:build": "electron-builder",
     "start": "next start",
     "lint": "next lint"
@@ -44,7 +44,7 @@
     "productName": "DevStudio",
     "files": [
       "electron/**/*",
-      "out/**/*",
+      "out/**/*", 
       "node_modules/**/*",
       "package.json"
     ],
@@ -53,11 +53,15 @@
       "output": "dist/installers"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "assets/icon.png"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "assets/icon.png" 
     },
-    "linux": {}
+    "linux": {
+        "icon": "assets/icon.png" 
+    }
   }
 }

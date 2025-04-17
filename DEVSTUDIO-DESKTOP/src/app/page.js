@@ -4,24 +4,26 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Sidebar from '../../components/Sidebar';
 import FileBar from '../../components/FileBar';
 import Topbar from '../../components/Topbar';
-import ChatSection from '../../components/c2c';
+import ChatSection from '../../components/ChatSection';
 import Bottombar from '../../components/Bottombar';
 import HomeTabContent from '../../components/HomeTabContent';
 import CodeDisplay from '../../components/CodeDisplay';
 import { FiLoader } from 'react-icons/fi';
 import { useGitHubApi } from '../../hooks/useGitHubApi';
-import RepoScanner from '../../components/RepoScanner'; // Corrected path assuming it's in components
+import RepoScanner from '../../components/RepoScanner'; 
 import AutomationTab from '../../components/Automation';
 
 const GITHUB_ACCESS_TOKEN_KEY = 'github_access_token';
 
-const PlaceholderView = ({ tabName }) => (
-    <div className="[.dark_&]:text-white [.dark_&]:bg-gray-800 flex flex-1 flex-col items-center justify-center p-6 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 overflow-y-auto">
-        <h2 className="text-2xl font-semibold mb-2">Welcome to {tabName}</h2>
-        <p>Content for {tabName} will be displayed here.</p>
-        {/* Ensure this container takes up space */}
-        <div className="min-h-[200px]"></div> {/* Add minimum height or similar */}
-    </div>
+const PlaceholderView = () => (
+  <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+  <img
+    src="/logo.svg"
+    alt="No Repo Selected"
+    className="w-[300px] h-[300px] mb-4 text-gray-500 opacity-50"
+  />
+  <p className="text-lg">Please select a repository from the dropdown.</p>
+</div>
 );
 
 
@@ -308,13 +310,13 @@ export default function Home() {
                 </div>
 
                 {/* --- Code / Chat Tab Container --- */}
-                {/* This container is visible if EITHER Code or Chat is active */}
                 <div style={{ display: (activeTab === 'Code' || activeTab === 'Chat') ? 'flex' : 'none' }} className="flex flex-1 overflow-hidden ">
                      {!selectedRepo && sessionStatus === 'authenticated' ? (
                         <div className="[.dark_&]:text-white [.dark_&]:bg-gray-800 flex flex-1 items-center justify-center p-6 text-center text-gray-500  bg-gray-50 dark:bg-gray-900">
                              {isRepoListLoading ? <FiLoader size={24} className="animate-spin text-blue-500" />
                                 : repoListError ? <span className="text-red-500">Error loading repositories: {repoListError}</span>
-                                : userRepos.length > 0 ? 'Please select a repository from the dropdown.'
+                                : userRepos.length > 0 ? 
+                                <PlaceholderView/>
                                 : 'No repositories found or you may not have access.'}
                          </div>
                      ) : selectedRepo ? ( // Only render FileBar etc. if repo is selected
@@ -330,15 +332,7 @@ export default function Home() {
                              <div className="flex-1 flex flex-col overflow-hidden">
                                  {/* Chat View (visible only if activeTab is 'Chat') */}
                                  <div style={{ display: activeTab === 'Chat' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
-                                      {/* <ChatSection
-                                          selectedRepoFullName={selectedRepo.full_name}
-                                          accessToken={accessToken}
-                                          selectedFile={selectedFile}
-                                          selectedFileContent={fileContent}
-                                          isLoading={isFileLoading}
-                                          error={fileError}
-                                      /> */}
-
+                                    
                                         <ChatSection
                                           selectedRepoFullName={selectedRepo.full_name}
                                           accessToken={accessToken}
@@ -370,7 +364,7 @@ export default function Home() {
                           <div className="flex flex-1 items-center justify-center p-6 text-center text-gray-500 [.dark_&]:text-white bg-gray-50 [.dark_&]:bg-gray-800">
                               {isRepoListLoading ? <FiLoader size={24} className="animate-spin text-blue-500 " />
                                   : repoListError ? <span className="text-red-500">Error: {repoListError}</span>
-                                  : userRepos.length > 0 ? 'Please select a repository to scan.'
+                                  : userRepos.length > 0 ? <PlaceholderView/>
                                   : 'No repositories found or you may not have access.'}
                           </div>
                      ) : selectedRepo ? (
@@ -386,19 +380,30 @@ export default function Home() {
                      }
                 </div>
 
-                {/* --- Settings Tab --- */}
-                <div style={{ display: activeTab === 'Settings' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
-                    <PlaceholderView tabName="Settings" />
-                </div>
+                
 
                 {/* --- Automation Tab --- */}
                 <div style={{ display: activeTab === 'Automation' ? 'flex' : 'none' }} className="flex flex-1 flex-col overflow-hidden">
-                    {/* <PlaceholderView tabName="Automation" /> */}
-                    <AutomationTab/>
+                    
+
+                  {!selectedRepo && sessionStatus === 'authenticated' ? (
+                          <div className="flex flex-1 items-center justify-center p-6 text-center text-gray-500 [.dark_&]:text-white bg-gray-50 [.dark_&]:bg-gray-800">
+                              {isRepoListLoading ? <FiLoader size={24} className="animate-spin text-blue-500 " />
+                                  : repoListError ? <span className="text-red-500">Error: {repoListError}</span>
+                                  : userRepos.length > 0 ? <PlaceholderView/>
+                                  : 'No repositories found or you may not have access.'}
+                          </div>
+                     ) : selectedRepo ? (
+                      <AutomationTab 
+                      repoFullName={selectedRepo?.full_name} 
+                      accessToken={accessToken}
+                      />
+                     ) : null 
+                     }
+
+
                 </div>
 
-                {/* Optional: Fallback for unknown activeTab */}
-                {/* Add if necessary */}
 
             </>
         );

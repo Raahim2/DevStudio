@@ -132,7 +132,7 @@ const Topbar = ({
 
       {/* Middle Section */}
       <div className="hidden md:flex items-center space-x-2 flex-shrink-0">
-        <span className="font-semibold text-gray-900 dark:text-gray-200 [.dark_&]:text-white">Chats</span>
+        <span className="font-semibold text-gray-900 dark:text-gray-200 [.dark_&]:text-white">DevStudio</span>
       </div>
 
       <div className="new-repo-modal-container">
@@ -147,20 +147,20 @@ const Topbar = ({
       <div className="flex items-center space-x-1 md:space-x-2">
         {/* ... (Action buttons, Theme Toggle, Separator, User Avatar Dropdown remain the same) ... */}
          {/* Action Buttons */}
-         <button
+         {/* <button
           onClick={() => { console.log("Folder action clicked (placeholder)"); }}
           title="Folder action (placeholder)"
           className="p-1.5 md:p-2 rounded text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-150"
         >
           <FiBox size={18}/>
-        </button>
-        <button
+        </button> */}
+        {/* <button
           onClick={() => { console.log("New Chat clicked (placeholder)"); }}
           title="New Chat"
           className="p-1.5 md:p-2 rounded text-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-150"
         >
           <FiPlus size={18} />
-        </button>
+        </button> */}
 
         {/* Theme Toggle */}
         <ThemeToggle />
@@ -170,6 +170,7 @@ const Topbar = ({
 
         {/* User Avatar with Dropdown */}
         <div className="relative user-dropdown-container">
+        
           <div
             onClick={() => setShowUserDropdown(!showUserDropdown)}
             className="cursor-pointer"

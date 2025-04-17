@@ -1,5 +1,4 @@
 // src/lib/geminiUtils.js (or similar location)
-import { FiAlertTriangle } from 'react-icons/fi'; // Or use for error display
 
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API;
 const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest';
@@ -112,5 +111,112 @@ Modified Code:`;
     } catch (error) {
         console.error("Gemini Edit API Call Failed:", error);
         throw error;
+    }
+};
+
+export const callGeminiForPlan = async (prompt) => {
+    if (!API_KEY || API_KEY === 'YOUR_GEMINI_API_KEY' || API_KEY.trim() === '') {
+        throw new Error("Gemini API key not configured. Set NEXT_PUBLIC_GEMINI_API.");
+    }
+    if (!prompt) {
+        throw new Error("Prompt is required for plan generation.");
+    }
+
+    const requestBody = {
+        contents: [{
+            role: 'user',
+            parts: [{ text: prompt }]
+        }],
+        safetySettings,
+        generationConfig,
+    };
+
+    const fullApiUrl = `${API_GENERATE_CONTENT_URL}?key=${API_KEY}`;
+    console.log("Calling Gemini for Plan:", fullApiUrl);
+
+    try {
+        const response = await fetch(fullApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+            // ... (Keep your robust error handling) ...
+             let errorData;
+             try { errorData = await response.json(); } catch (e) { /* ignore */ }
+             const errorDetails = errorData?.error?.message || `API Error: ${response.status} ${response.statusText}`;
+             console.error("Gemini API Error Response (Plan):", errorData);
+             if (response.status === 400 && errorDetails.includes("API key not valid")) throw new Error("Invalid Gemini API Key.");
+             // ... add other specific status checks ...
+             throw new Error(errorDetails);
+        }
+
+        const responseData = await response.json();
+        console.log("Gemini API Response (Plan):", responseData);
+
+        const candidate = responseData?.candidates?.[0];
+        const blockReason = responseData?.promptFeedback?.blockReason;
+        const finishReason = candidate?.finishReason;
+
+        // ... (Keep safety/finishReason checks) ...
+        if (blockReason) { throw new Error(`Content blocked by API: ${blockReason}.`); }
+        if (finishReason === 'SAFETY') { throw new Error("Content blocked due to safety settings."); }
+        // ... other finish reasons ...
+
+        const rawText = candidate?.content?.parts?.[0]?.text;
+        if (!rawText) {
+            console.warn("Gemini Response Missing Text:", responseData);
+            throw new Error("Model did not return any plan content.");
+        }
+
+        console.log("Raw text from Gemini:", rawText); // Log raw output
+
+        // --- START CORRECTED CLEANING LOGIC ---
+        let jsonToParse = rawText.trim(); // Trim whitespace first
+
+        // Use regex to find and extract content within ```json ... ``` or ``` ... ```
+        const fenceRegex = /```(?:json)?\s*([\s\S]*?)\s*```/; // Matches optional "json" label
+        const match = jsonToParse.match(fenceRegex);
+
+        if (match && match[1]) {
+            // If fences are found, use the captured content (match[1])
+            jsonToParse = match[1].trim();
+            console.log("Successfully extracted content from within markdown fences:", jsonToParse);
+        } else {
+            // If no fences found, log a warning but proceed, assuming the raw text might be the JSON
+            console.log("Markdown fences not found. Attempting to parse the trimmed text directly:", jsonToParse);
+            // Optional: Add a check if it starts/ends with braces as a sanity check
+            if (!jsonToParse.startsWith('{') || !jsonToParse.endsWith('}')) {
+                 console.warn("Text without fences doesn't start/end with braces. Parsing might fail.");
+            }
+        }
+        // --- END CORRECTED CLEANING LOGIC ---
+
+        // Attempt to parse the processed text
+        try {
+            const parsedPlan = JSON.parse(jsonToParse);
+
+            // Basic validation (recommended)
+            if (!parsedPlan["Project Overview"] || !parsedPlan["Daily Breakdown"]) {
+                console.warn("Parsed JSON missing expected keys:", parsedPlan);
+                throw new Error("Generated plan has an unexpected structure (missing required keys).");
+            }
+            console.log("Successfully parsed processed JSON.");
+            return parsedPlan;
+
+        } catch (parseError) {
+            console.error("Failed to parse Gemini JSON response:", parseError);
+            // Log the TEXT THAT FAILED parsing - this is crucial for debugging
+            console.error("Final Text that failed parsing:", jsonToParse);
+            console.error("Original Raw Text:", rawText); // Log original text for context
+            // Provide a clearer error message indicating the likely cause
+            throw new Error(`Failed to parse the generated plan. The model's output likely included non-JSON text (like markdown fences) that couldn't be fully removed. Parse Error: ${parseError.message}`);
+        }
+
+    } catch (error) {
+        // Log the error coming from the try block OR the initial fetch/checks
+        console.error("Gemini Plan API Call Failed:", error);
+        throw error; // Re-throw to be caught by the calling component
     }
 };

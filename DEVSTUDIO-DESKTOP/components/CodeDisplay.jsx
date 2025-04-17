@@ -629,7 +629,8 @@ const CodeDisplay = ({
                      {/* No File Selected Placeholder */}
                      {showNoFileSelected && (
                         <div className="flex flex-1 flex-col items-center justify-center h-full p-6 text-gray-500 dark:text-gray-400">
-                            <FiCode size={48} className="mb-4 opacity-50" />
+                            {/* <FiCode size={48} className="mb-4 opacity-50" /> */}
+                            <img src="logo.svg" alt="No file selected" className="w-16 h-16 mb-4 opacity-50" />
                             <p>Select a file from the list on the left to edit.</p>
                              <p className="text-xs mt-2">(Use <kbd className="px-1 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">Cmd/Ctrl+K</kbd> to edit selection with AI)</p>
                              <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border border-gray-300 dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700 font-mono text-xs">Cmd/Ctrl+S</kbd> to commit changes)</p>

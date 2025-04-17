@@ -458,10 +458,17 @@ const HomeTabContent = ({
                     // Placeholder when no repo is selected
                      // Applied [.dark_&]: variant for text color
                     <div className="flex flex-1 flex-col items-center justify-center text-center text-gray-500 [.dark_&]:text-gray-400 p-6">
-                        <FiBox size={40} className="mb-3"/>
                         <p className="font-medium">
                             {(userRepos && userRepos.length > 0)
-                                ? 'Select a repository from the list.'
+                                ? 
+                                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
+                                  <img
+                                    src="logo.svg"
+                                    alt="No Repo Selected"
+                                    className="w-[300px] h-[300px] mb-4 text-gray-500 opacity-50"
+                                  />
+                                  <p className="text-lg">Please select a repository from the dropdown.</p>
+                                </div>
                                 : (repoListError
                                     ? 'Could not load repositories.'
                                     : (sessionStatus === 'authenticated'

@@ -1,268 +1,279 @@
-// src/app/main/components/ChatSection.js (or your correct path)
+// src/components/ChatSection.js
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { FiAlertCircle, FiX, FiZap } from 'react-icons/fi'; // Icons specifically for ChatSection
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { FiSend, FiCpu, FiAlertCircle, FiX, FiZap, FiInfo, FiFileText } from 'react-icons/fi';
+import { useGeminiChat } from '../hooks/useGeminiChat'; // Ensure this path is correct
+import ChatMessage from './ChatMessage'; // Ensure this path is correct
+import CodeBlock from './CodeBlock'; // Ensure this path is correct
 
-// Import Hooks
-import { useGeminiChat } from '../hooks/useGeminiChat'; // Adjust path as needed
-import { useGitHubApi } from '../hooks/useGitHubApi';   // Adjust path as needed
+// Simple hash function (remains unchanged)
+// const hashString = (str) => { ... }; // Assuming hashString is defined elsewhere or not strictly needed here anymore
 
-// Import Components
-import ChatMessage from './ChatMessage';        // Adjust path
-import CodeBlock from './CodeBlock';            // Adjust path
-import ChatInput from './ChatInput';            // Adjust path
-import CreateFileModal from './CreateFileModal'; // Adjust path
-
-// --- Main Chat Section Component ---
 const ChatSection = ({
-    selectedRepoFullName, // Format: "owner/repo"
-    selectedFile,         // Object: { name, path, sha } or null
-    selectedFileContent,  // String content or null
-    isLoading: isFileLoading, // Boolean: Is the file content being loaded?
-    error: fileError,     // String: Error message from file loading, or null
-    accessToken           // String: GitHub personal access token
+    selectedRepoFullName,
+    accessToken,
+    selectedFile,
+    context,
+    onClearContext
 }) => {
-    const chatContainerRef = useRef(null); // Ref for scrolling the chat message area
-
-    // --- Initialize Hooks ---
-    // Hook for managing Gemini chat interaction and history
+    const chatContainerRef = useRef(null);
     const {
-        chatHistory,              // Array of chat messages { id, role, text }
-        sendMessage: sendGeminiMessage, // Function to send a message to Gemini
-        isSending: isGeminiSending,   // Boolean: Is Gemini processing a message?
-        error: geminiError,         // String: Error from Gemini hook, or null
-        clearError: clearGeminiError, // Function to clear Gemini error state
-        isApiKeyMissing,          // Boolean: Is the Gemini API key missing/invalid?
-        stopGenerating: stopGeminiGenerating, // Function to stop Gemini generation
-        setFileContext: setGeminiFileContext, // Function to inform hook about file context changes
-    } = useGeminiChat(); // Initialize with default empty history
+        chatHistory,
+        sendMessage,
+        isSending,
+        error: geminiError,
+        clearError: clearGeminiError,
+        isApiKeyMissing,
+        stopGenerating,
+        setFileContext,
+    } = useGeminiChat(); // Potentially pass accessToken if hook needs it
 
-    const {
-        commitCode,                // Function to commit code changes
-        operationError: gitHubCommitError,   // String: Error from GitHub commit, or null
-        clearCommitError: clearGitHubCommitError, // Function to clear GitHub commit error state
-    } = useGitHubApi(accessToken, selectedRepoFullName); // Pass necessary arguments
+    const [inputMessage, setInputMessage] = useState('');
+    // removed copiedStates as CodeBlock manages its own copy state now
+    // const [copiedStates, setCopiedStates] = useState({});
 
-    // --- State Managed by ChatSection ---
-    const [inputMessage, setInputMessage] = useState(''); // State for the text input field
-    const [showCreateModal, setShowCreateModal] = useState(false); // State for CreateFileModal visibility
-    const [codeForModal, setCodeForModal] = useState('');      // State for storing code to pass to CreateFileModal
+    // Effect to pass the file context content to the chat hook
+    useEffect(() => {
+        if (selectedFile && context !== null) {
+             const fileForHook = {
+                 path: selectedFile.path,
+                 name: selectedFile.name,
+                 content: context, // Ensure content is string or null
+             };
+            setFileContext(fileForHook);
+        } else {
+            setFileContext(null); // Clear context in the hook if no file or content
+        }
+    }, [selectedFile, context, setFileContext]);
 
-    // Determine the primary error to display (prioritizing GitHub, then Gemini, then file loading)
-    const displayError = gitHubCommitError || geminiError || fileError;
 
-    // --- Effects ---
-
-    // Effect to scroll chat to the bottom when new messages are added
+    // Auto-scroll effect
     useEffect(() => {
         if (chatContainerRef.current) {
-            // Use requestAnimationFrame to ensure scrolling occurs after DOM updates
             requestAnimationFrame(() => {
                 chatContainerRef.current.scrollTo({
                     top: chatContainerRef.current.scrollHeight,
-                    behavior: 'smooth' // Smooth scrolling animation
+                    behavior: 'smooth'
                 });
             });
         }
-    }, [chatHistory]); // Rerun whenever chatHistory array changes
+    }, [chatHistory]); // Trigger scroll on new messages
 
-    // Effect to notify the Gemini chat hook when the selected file context changes
-    useEffect(() => {
-        // Call the function exposed by the useGeminiChat hook
-        setGeminiFileContext(selectedFile);
-    }, [selectedFile, setGeminiFileContext]); // Rerun if selectedFile or the hook's function changes
+    const handleInputChange = (e) => setInputMessage(e.target.value);
 
-    // --- Event Handlers ---
+    const handleSendMessage = useCallback(() => {
+        if (!inputMessage.trim() || isSending || isApiKeyMissing) return;
+        sendMessage(inputMessage, selectedFile, context);
+        setInputMessage('');
+    }, [inputMessage, isSending, isApiKeyMissing, sendMessage, selectedFile, context]); // Added context dependency
 
-    // Update input field state when user types
-    const handleInputChange = (e) => {
-        setInputMessage(e.target.value);
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            handleSendMessage();
+        }
     };
 
-    // Handle sending a message (triggered by ChatInput component)
-    const handleSendMessage = useCallback(() => {
-        if (!inputMessage.trim()) return; // Don't send empty messages
-        // Call the sendMessage function from the useGeminiChat hook
-        sendGeminiMessage(inputMessage, selectedFile, selectedFileContent);
-        setInputMessage(''); // Clear the input field after sending
-    }, [inputMessage, selectedFile, selectedFileContent, sendGeminiMessage]); // Dependencies
+    const handleStopGenerating = useCallback(() => stopGenerating(), [stopGenerating]);
 
-    // Handle stopping AI generation (triggered by ChatInput component)
-    const handleStopGenerating = useCallback(() => {
-        stopGeminiGenerating(); // Call the function from the useGeminiChat hook
-    }, [stopGeminiGenerating]);
+    // handleCopyCode is removed as CodeBlock handles its own copying
+    // const handleCopyCode = useCallback((codeString, id) => { ... }, []);
 
-    // Handle opening the Create File modal (triggered by CodeBlock component)
-    const handleShowCreateFileModal = useCallback((codeContent) => {
-        // Precondition check
-        if (!selectedRepoFullName || !accessToken) {
-             console.error("Cannot show create modal: Missing repo or token");
-             // Optionally set a specific error state here if needed for UI feedback
-             return;
-        }
-        console.log("ChatSection: Showing create file modal.");
-        setCodeForModal(codeContent); // Store the code content for the modal
-        setShowCreateModal(true);     // Set state to make the modal visible
-        // Clear any existing errors when opening the modal for a fresh start
-        clearGeminiError();
-        clearGitHubCommitError();
-    }, [selectedRepoFullName, accessToken, clearGeminiError, clearGitHubCommitError]); // Dependencies
-
-    // Handle closing the Create File modal (callback from CreateFileModal component)
-    const handleModalClose = useCallback((didCreateFile = false) => {
-        setShowCreateModal(false); // Hide the modal
-        setCodeForModal('');     // Clear the stored code content
-        if (didCreateFile) {
-            console.log("ChatSection: File creation successful (reported by modal).");
-            // TODO: Implement desired action after successful file creation
-            // e.g., Add a system message to chat, trigger a refresh of the file list in FileBar
-            // Example: Add system message (needs access to setChatHistory or similar)
-            // setChatHistory(prev => [...prev, { id: `sys-${Date.now()}`, role: 'system', text: `File created successfully!` }]);
-        } else {
-             console.log("ChatSection: Create file modal closed without creating file.");
-        }
-    }, []); // No dependencies needed if it only sets local state
-
-    // Function to clear the currently displayed error message
-    const clearDisplayError = useCallback(() => {
-        clearGitHubCommitError(); // Clear GitHub API errors
-        clearGeminiError();     // Clear Gemini API errors
-        // Note: fileError comes from props and cannot be cleared here.
-        // The parent component managing file loading would need to clear it.
-    }, [clearGitHubCommitError, clearGeminiError]);
-
-
-    // --- Markdown Components Configuration ---
-    // Memoize the configuration object for ReactMarkdown's `components` prop
-    // This prevents unnecessary re-renders of messages if props haven't changed
+    // --- CORRECTED useMemo ---
+    // Memoized Markdown components for performance
     const markdownComponents = useMemo(() => ({
-        // Custom renderer for code blocks (``` ```)
         code: ({ node, inline, className, children, ...props }) => {
-             // Extract language from className (e.g., "language-javascript")
              const match = /language-(\w+)/.exec(className || '');
-             const language = match?.[1] || 'plaintext'; // Default to plaintext
-             // Clean up code string (remove potential trailing newline)
-             const codeString = String(children).replace(/\n$/, '');
+             const language = match?.[1] || 'plaintext';
+             // Ensure children is processed correctly to get the code string
+             const codeString = React.Children.toArray(children)
+                .map(child => (typeof child === 'string' ? child : '')) // Handle potential non-string children if any
+                .join('')
+                .replace(/\n$/, ''); // Remove trailing newline
 
-             // Render inline code (`code`) differently
              if (inline) {
-                 return <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded text-sm font-mono" {...props}>{children}</code>;
-             }
-             // Render block code using the CodeBlock component
-             else {
+                 // Style inline code
+                 return <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded text-sm font-mono text-purple-700 dark:text-purple-300" {...props}>{children}</code>;
+             } else {
+                 // Use the dedicated CodeBlock component, passing the CURRENT props
                  return (
-                     <CodeBlock
-                         language={language}
-                         codeString={codeString}
-                         selectedRepoFullName={selectedRepoFullName}
-                         selectedFile={selectedFile}
-                         onCommit={commitCode}
-                         onCreateFile={handleShowCreateFileModal}
-                     />
+                    <CodeBlock
+                        language={language}
+                        codeString={codeString}
+                        accessToken={accessToken} // Passed current value
+                        selectedRepoFullName={selectedRepoFullName} // Passed current value
+                        selectedFile={selectedFile} // Passed current value (FIXED)
+                        // Note: If CodeBlock's CreateFileModal needs onCreateFile,
+                        // you'll need to define and pass a suitable handler function here.
+                        // onCreateFile={handleCreateFileFromChat} // Example
+                        />
                  );
              }
         },
-         // Standard HTML elements mapping with Tailwind CSS classes for styling
-         p: ({ node, children }) => <p className={'mb-2 last:mb-0'}>{children}</p>,
-         ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2 pl-4" {...props} />,
-         ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2 pl-4" {...props} />,
-         li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-         blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-3 italic text-gray-600 dark:text-gray-400 mb-2" {...props} />,
-         a: ({ node, ...props }) => <a className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />, // Ensure links open in new tab
-         hr: ({ node, ...props }) => <hr className="my-4 border-gray-200 dark:border-gray-700" {...props} />,
-    // Dependencies for useMemo: Recreate the config if these functions/values change
-    }), [selectedRepoFullName, selectedFile, commitCode, handleShowCreateFileModal]);
+        // Standard markdown elements with basic styling (no changes needed here)
+        p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+        a: ({ node, ...props }) => <a className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+        ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2 pl-4 space-y-1" {...props} />,
+        ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2 pl-4 space-y-1" {...props} />,
+        li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+        blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-300 dark:border-gray-600 pl-3 italic text-gray-600 dark:text-gray-400 my-2" {...props} />,
+        strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+        em: ({ node, ...props }) => <em className="italic" {...props} />,
+    }), [
+        // --- UPDATED DEPENDENCIES ---
+        accessToken,
+        selectedRepoFullName,
+        selectedFile
+        // Add any other props/state from ChatSection that CodeBlock relies on
+        // If you add an `onCreateFile` handler passed to CodeBlock, include it here too.
+    ]); // Dependencies for memoization updated!
 
+    const isInteractionDisabled = isApiKeyMissing || isSending;
+    const displayError = geminiError;
+    const placeholderText = isApiKeyMissing ? "Cannot chat: Gemini API Key missing."
+                           : isSending ? "Generating response..."
+                           : selectedFile?.name ? `Ask about ${selectedFile.name}...` // Use filename in placeholder
+                           : "Type your message...";
 
-    // Determine if primary chat interactions should be disabled
-    // Disabled if API key is missing OR if there's an error loading the initial file context
-    const isInteractionDisabled = isApiKeyMissing || !!fileError;
-
-
-    // --- JSX Rendering ---
+    // --- JSX RENDER (no changes needed below this line compared to your previous version) ---
     return (
-        // Main container for the chat section
-        <div className="[.dark_&]:bg-gray-800  [.dark_&]:border-gray-800 flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden h-full border-l border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 overflow-hidden border-l border-gray-200 dark:border-gray-700">
 
-            {/* Scrollable Chat Messages Area */}
+            {/* Chat messages area */}
             <div
                 ref={chatContainerRef}
-                className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 scroll-smooth flex flex-col" // Added flex flex-col for alignment
+                className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
             >
-                {/* Initial State Message (when no history/file selected) */}
-                {chatHistory.length === 0 && !isGeminiSending && !selectedFile && (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 px-4">
-                         {/* Show API key error if applicable */}
-                         {isApiKeyMissing ? (
-                            <div className="flex flex-col items-center text-red-600 dark:text-red-400">
-                                <FiAlertCircle size={24} className="mb-2"/>
-                                <span>{geminiError || "Gemini API Key missing."}</span>
-                                <span className="text-xs mt-1">(Check environment variables)</span>
-                            </div>
+                {/* --- Empty/Initial State --- */}
+                {chatHistory.length === 0 && !isSending && !isApiKeyMissing && (
+                     <div className="flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 px-4 h-full min-h-[200px]">
+                         {selectedFile?.name ? (
+                             <>
+                                 <FiFileText size={36} className="mb-3 text-indigo-400"/>
+                                 <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">File Context Active</p>
+                                 <p className="text-sm bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded max-w-md mx-auto font-mono text-gray-600 dark:text-gray-300" title={selectedFile.path}>
+                                     {selectedFile.name}
+                                 </p>
+                                 <p className="text-sm mt-2">Ask anything about this file.</p>
+                             </>
                          ) : (
-                            // Generic prompt message
-                            <div className="flex flex-col items-center">
-                                <FiZap size={32} className="mb-3 text-indigo-400"/>
+                            <>
+                                {/* <FiZap size={36} className="mb-3 text-indigo-400"/> */}
+                                <img src="logo.svg" alt="DevStudio Logo" className="w-16 h-16 mb-4 opacity-50" />
                                 <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Chat Ready</p>
-                                <p className="text-sm">Select a file or type a message below.</p>
-                            </div>
+                                <p className="text-sm">Type a message below to start chatting.</p>
+                             </>
+                         )}
+                     </div>
+                 )}
+
+                 {/* --- API Key Missing State --- */}
+                {isApiKeyMissing && chatHistory.length === 0 && (
+                     <div className="flex flex-col items-center justify-center text-center text-red-600 dark:text-red-400 p-4 rounded border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 m-4">
+                         <FiAlertCircle size={28} className="mb-2"/>
+                         <span className="font-medium">{geminiError || "Gemini API Key missing or invalid."}</span>
+                         <span className="text-sm mt-1">Please configure the API key in settings.</span>
+                     </div>
+                 )}
+
+                {/* --- Chat History --- */}
+                {chatHistory.map((message) => (
+                    <ChatMessage
+                        key={message.id} // Ensure unique key
+                        message={message}
+                        markdownComponents={markdownComponents} // Pass memoized components
+                    />
+                ))}
+
+                 {/* --- Error Display --- */}
+                 {displayError && !isSending && (
+                     <div className="sticky bottom-2 px-2 z-10">
+                      <div className="flex items-center p-3 mx-auto w-full max-w-lg bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-200 rounded-lg text-sm border border-red-200 dark:border-red-700/50 shadow-md">
+                          <FiAlertCircle className="mr-2 flex-shrink-0" size={18}/>
+                          <span className="flex-1 text-center">{displayError}</span>
+                          <button
+                              onClick={clearGeminiError}
+                              className="ml-2 p-1 text-red-500 hover:text-red-700 dark:text-red-300 dark:hover:text-red-100 rounded-full hover:bg-red-200 dark:hover:bg-red-800/60 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors"
+                              aria-label="Dismiss error"
+                              title="Dismiss error"
+                          >
+                            <FiX size={16}/>
+                          </button>
+                      </div>
+                    </div>
+                 )}
+            </div>
+
+            {/* --- Bottom Input Area --- */}
+            <div className="flex-shrink-0 bg-white dark:bg-gray-800 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 shadow-inner">
+
+                 {/* --- Stop Generating Button --- */}
+                 {isSending && (
+                    <div className="flex justify-center mb-2.5">
+                        <button
+                            onClick={handleStopGenerating}
+                            className="px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded-md shadow-sm flex items-center gap-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-1 dark:focus:ring-offset-gray-800"
+                            title="Stop generating response"
+                         >
+                            <FiCpu size={14}/> Stop Generating
+                        </button>
+                    </div>
+                 )}
+
+                {/* --- Active File Context Indicator --- */}
+                {selectedFile && selectedFile.name && (
+                    <div className="mb-2 px-2 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/60 rounded-md py-1.5">
+                        <div className="flex items-center overflow-hidden pl-1">
+                             <FiFileText className="mr-1.5 flex-shrink-0 text-blue-500 dark:text-blue-400" size={14}/>
+                             <span className="font-medium mr-1 flex-shrink-0">File:</span>
+                             <span
+                                className="truncate font-mono text-gray-700 dark:text-gray-300"
+                                title={`Context File: ${selectedFile.path}`}
+                             >
+                                {selectedFile.name}
+                             </span>
+                        </div>
+                         {onClearContext && typeof onClearContext === 'function' && (
+                             <button
+                                 onClick={onClearContext}
+                                 className="ml-2 mr-1 p-0.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/50 focus:outline-none transition-colors"
+                                 title="Clear file context"
+                                 aria-label="Clear file context"
+                             >
+                                 <FiX size={15} />
+                             </button>
                          )}
                     </div>
                 )}
 
-                {/* Render the list of chat messages */}
-                {chatHistory.map((message) => (
-                    <ChatMessage
-                        key={message.id} // Use unique message ID as key
-                        message={message}
-                        markdownComponents={markdownComponents} // Pass the memoized components config
+                {/* --- Text Input and Send Button --- */}
+                <div className="relative flex items-end gap-2">
+                    <textarea
+                        placeholder={placeholderText}
+                        value={inputMessage}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        rows={1}
+                        className="flex-1 py-2.5 pl-4 pr-10 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed transition duration-150 ease-in-out placeholder-gray-500 dark:placeholder-gray-400 dark:text-white shadow-sm focus:shadow-md"
+                        disabled={isInteractionDisabled}
+                        style={{ maxHeight: '150px', overflowY: 'auto' }}
+                        aria-label="Chat input message"
                     />
-                ))}
-
-                 {/* Global Error Display Area (at the bottom of messages) */}
-                 {displayError && !isGeminiSending && ( // Show only if there's an error and AI is not currently sending
-                     <div className="mt-auto sticky bottom-2 px-4 z-10"> {/* Use mt-auto to push down, sticky to keep in view */}
-                       <div className="flex items-center justify-center p-3 mx-auto w-full max-w-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md text-sm border border-red-200 dark:border-red-600/50 shadow-sm">
-                           <FiAlertCircle className="mr-2 flex-shrink-0" size={18}/>
-                           <span className="flex-1 text-center">{displayError}</span>
-                           {/* Button to dismiss the error */}
-                           <button
-                                onClick={clearDisplayError}
-                                className="ml-2 p-1 text-red-500 hover:text-red-700 dark:text-red-300 dark:hover:text-red-100 rounded-full hover:bg-red-200 dark:hover:bg-red-800/50 focus:outline-none focus:ring-1 focus:ring-red-500"
-                                aria-label="Dismiss error"
-                                title="Dismiss error"
-                            >
-                             <FiX size={16}/>
-                           </button>
-                       </div>
-                     </div>
-                 )}
-            </div> {/* End Chat Messages Area */}
-
-            {/* Chat Input Area (uses the dedicated component) */}
-            <ChatInput
-                inputValue={inputMessage}
-                onInputChange={handleInputChange}
-                onSendMessage={handleSendMessage}
-                isSending={isGeminiSending} // Pass Gemini's sending state
-                onStopGenerating={handleStopGenerating}
-                selectedFile={selectedFile}
-                isFileLoading={isFileLoading}
-                fileError={fileError}
-                isInteractionDisabled={isInteractionDisabled} // Pass combined disabled flag
-            />
-
-            {/* Create File Modal (Rendered conditionally, managed by state) */}
-            <CreateFileModal
-                isOpen={showCreateModal}
-                onClose={handleModalClose} // Pass the close handler
-                initialCode={codeForModal} // Pass the code for the new file
-                accessToken={accessToken} // Pass the GitHub token
-                selectedRepoFullName={selectedRepoFullName} // Pass the repo name
-            />
-
-        </div> /* End Main Container */
+                    <div className="absolute bottom-[7px] right-[7px]">
+                        <button
+                            onClick={handleSendMessage}
+                            className="p-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed transition-all duration-150 ease-in-out transform active:scale-90"
+                            disabled={isInteractionDisabled || !inputMessage.trim()}
+                            title="Send message (Enter)"
+                            aria-label="Send message"
+                        >
+                            <FiSend size={18} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 
