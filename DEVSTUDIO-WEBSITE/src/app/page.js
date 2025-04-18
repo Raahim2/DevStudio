@@ -104,7 +104,7 @@ export default function HomePage() {
 
         {/* --- Hero Section --- */}
         <main className="flex flex-grow flex-col items-center justify-center pt-28 sm:pt-32 pb-16 md:pb-24 text-center px-4 sm:px-6 lg:px-8">
-           <div className="mb-10 md:mb-12 w-[60vw] sm:w-[50vw] h-[25vh] sm:h-[30vh]">
+           <div className="mb-10 md:mb-12 w-[100vw] sm:w-[80vw] h-[25vh] sm:h-[30vh]">
             <TextHoverEffect text="DevStudio" duration={0.5} />
           </div>
 
