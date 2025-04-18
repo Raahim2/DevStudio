@@ -7,10 +7,9 @@ import { PlaceholdersAndVanishInput } from "../../components/placeholders-and-va
 import { TextHoverEffect } from "../../components/text-hover-effect";
 import { Features } from "../../components/features-section";
 import SectionStart from "../../components/section-start";
-// import { Tabs } from "../../components/tabs";
-import { MacbookScroll } from "../../components/macbook";
 import FAQ from '../../components/faq';
-import GetStartedSection from '../../components/getstarted';
+import DownloadDevStudio from '../../components/download-devstudio';
+import { Video } from '../../components/Video';
 import './globals.css';
 
 export default function HomePage() {
@@ -135,86 +134,58 @@ export default function HomePage() {
           </div>
         </main>
 
-        {/* --- Bouncing Arrow --- */}
-        {/* Keep this positioned relative to the outer container if desired */}
         <div className="absolute bottom-8 md:bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce z-10"> {/* Added z-index */}
           <svg className="w-6 h-6 text-gray-500 dark:text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7"></path>
           </svg>
         </div>
 
-        {/* --- Optional Macbook Scroll --- */}
-        <div className="my-16 md:my-24"> <MacbookScroll showGradient={true} src="https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4"/> </div>
-
-
-        {/* --- Section Dividers and Content --- */}
-        {/* Using wrapper divs with margin for spacing between sections */}
-
-        {/* --- SectionStart 1 --- */}
-        <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> {/* Added padding */}
-          <SectionStart
-            typingWords={[
-              { text: "Smart.", className: "text-gray-700 dark:text-neutral-400" },
-              { text: "Fast.", className: "text-gray-700 dark:text-neutral-400" },
-              { text: "AI-powered.", className: "text-gray-700 dark:text-neutral-400" },
-            ]}
-            buttonText="Get Started"
-          />
+        <div className="px-4 sm:px-6 lg:px-8"> {/* Added padding */}
+          <SectionStart buttonText="Demo"/>
         </div>
 
-        {/* --- Features Section --- */}
+          <div className="relative w-3/4 m-auto overflow-hidden rounded-xl border border-gray-300 dark:border-gray-700  z-10 mt-20  bg-neutral-100 p-4 shadow-md  dark:bg-neutral-900">
+            <Video
+              className="block dark:hidden"
+              animationStyle="from-center"
+              videoSrc="https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4"
+              thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png"
+              thumbnailAlt="Hero Video"
+            />
+            <Video
+              className="hidden dark:block"
+              animationStyle="from-center"
+              videoSrc="https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4"
+              thumbnailSrc="https://startup-template-sage.vercel.app/hero-dark.png"
+              thumbnailAlt="Hero Video"
+            />
+          </div>
+
+          <div className="px-4 sm:px-6 lg:px-8"> {/* Added padding */}
+          <SectionStart buttonText="Get Started"/>
+        </div>
+
         <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> {/* Added padding */}
           <Features />
         </div>
 
-        {/* --- SectionStart 2 --- */}
-        {/* <div className="my-16 md:my-24 px-4 sm:px-6 lg:px-8"> 
-          <SectionStart
-            typingWords={[
-              { text: "See ", className: "text-gray-700 dark:text-neutral-400" },
-              { text: " Project. ", className: "text-gray-700 dark:text-neutral-400" },
-              { text: " Overview", className: "text-gray-700 dark:text-neutral-400" },
-            ]}
-            buttonText="Overview"
-          />
-        </div> */}
-
-        {/* --- Tabs Section --- */}
-        {/* Container needs vertical margin. Max-width and centering are good. */}
-        {/* Let Tabs component handle its own internal padding if needed */}
-        {/* <div className="h-[20rem] md:h-[40rem] [perspective:1000px] relative flex flex-col max-w-5xl mx-auto w-full items-start justify-start my-16 md:my-24 px-4 sm:px-6 lg:px-8"> */}
-           {/* Added horizontal padding */}
-          {/* <Tabs tabs={tabs} /> */}
-        {/* </div> */}
-
-        {/* --- SectionStart 3 --- */}
-        <div className=" px-4 sm:px-6 lg:px-8"> {/* Added padding */}
-          {/* <SectionStart
-            typingWords={[
-              { text: "See ", className: "text-gray-700 dark:text-neutral-400" },
-              { text: " Project. ", className: "text-gray-700 dark:text-neutral-400" },
-              { text: " FAQ's", className: "text-gray-700 dark:text-neutral-400" },
-            ]}
-            buttonText="FAQ's"
-          /> */}
+        <div className="px-4 sm:px-6 lg:px-8"> {/* Added padding */}
+          <SectionStart buttonText="FAQ"/>
         </div>
 
-        {/* --- FAQ Section --- */}
-        {/* Let FAQ handle its own padding via max-w-3xl mx-auto px-4 etc. */}
-        {/* Added bottom margin to the wrapper div */}
-        <div className="mt-16 md:mt-24">
-           {/* Removed fixed height/perspective. Let FAQ control its size */}
-           <FAQ/>
+        <div>
+          <FAQ />
         </div>
 
-        {/* --- Get Started Section --- */}
-        {/* This component handles its own background and padding */}
-        {/* No extra margin needed here as the component has py-16/py-24 */}
-        <GetStartedSection />
+        <div className="px-4 sm:px-6 lg:px-8"> {/* Added padding */}
+          <SectionStart buttonText="Install"/>
+        </div>
 
-        {/* --- Footer --- */}
-        {/* Add Footer component here if you have one */}
-        {/* <Footer /> */}
+        <div>
+          <DownloadDevStudio />
+        </div>
+
+
 
       </div> {/* End of main outer container */}
     </>

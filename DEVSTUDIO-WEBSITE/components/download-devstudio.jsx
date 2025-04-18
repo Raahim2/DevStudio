@@ -1,8 +1,6 @@
 "use client";
 
 import React from "react";
-import { cn } from "@/lib/utils";
-import { InteractiveGridPattern } from "./grid-pattern";
 import Image from "next/image";
 
 // Placeholder Logo
@@ -10,7 +8,7 @@ const LogoIcon = () => (
   <div className="relative w-32 h-32">
     {/* Light Logo */}
     <Image
-      src="/dark_logo.webp"
+      src="/logo-dark.png"
       alt="Logo Light"
       fill
       className="block dark:hidden object-contain"
@@ -18,7 +16,7 @@ const LogoIcon = () => (
     />
     {/* Dark Logo */}
     <Image
-      src="/light_logo.webp"
+      src="/logo-light.png"
       alt="Logo Dark"
       fill
       className="hidden dark:block object-contain"
@@ -29,8 +27,13 @@ const LogoIcon = () => (
 
 // Icons
 const WindowsIcon = () => (
-  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M3 12.5V6.388L9.478 5v7.5H3zm0 1.112V20l6.478-1.47V13.612H3zm7.522-8.634L21 3v8.5H10.522V4.978zm0 1.11L21 17.612V21l-10.478-2.5V13.612z" />
+  <svg
+    className="w-5 h-5 mr-2"
+    viewBox="0 0 448 512"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M0 93.7l183.6-24.6v171.5H0V93.7zM0 418.3l183.6 24.6V271.5H0v146.8zM204.8 69.1L448 32v208.6H204.8V69.1zM448 480l-243.2-37.1V271.5H448V480z" />
   </svg>
 );
 
@@ -46,8 +49,8 @@ const HammerIcon = () => (
   </svg>
 );
 
-const GetStartedSection = () => {
-  const currentVersion = "0.3.14";
+const DownloadDevStudio = () => {
+  const currentVersion = "0.1.1";
 
   return (
     <div className="w-full bg-white dark:bg-black py-16 md:py-24 px-4 sm:px-6 lg:px-8 text-center transition-colors">
@@ -64,6 +67,7 @@ const GetStartedSection = () => {
 
         {/* Download Button */}
         <button
+          onClick={() => window.location.href = 'https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio.Setup.0.1.1.exe'} 
           className="inline-flex items-center justify-center px-5 py-3 md:px-6 md:py-3.5 rounded-lg
                      bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
                      text-white font-semibold text-base md:text-lg shadow-lg
@@ -97,21 +101,10 @@ const GetStartedSection = () => {
           </a>
         </div>
 
-        {/* Background Grid Animation */}
-        <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden bg-white dark:bg-background -translate-y-1/2 rounded-lg shadow-lg mt-10 -z-10">
-          <InteractiveGridPattern
-            className={cn(
-              "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]",
-            )}
-            width={20}
-            height={20}
-            squares={[80, 80]}
-            squaresClassName="hover:fill-blue-500"
-          />
-        </div>
+       
       </div>
     </div>
   );
 };
 
-export default GetStartedSection;
+export default DownloadDevStudio;

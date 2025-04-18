@@ -10,19 +10,18 @@ import {
   IconTableColumn,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
-import Image from "next/image";
 import { IconRocket, IconUsers, IconSettings , Icon3dCubeSphereOff } from "@tabler/icons-react";
 
 export function Features() {
   return (
-    <BentoGrid className="max-w-4xl mx-auto md:auto-rows-[20rem]">
+    <BentoGrid className="max-w-4xl mx-auto md:auto-rows-[20rem] ">
       {items.map((item, i) => (
         <BentoGridItem
           key={i}
           title={item.title}
           description={item.description}
           header={item.header}
-          className={cn("[&>p:text-lg]", item.className)}
+          className={cn("[&>p:text-lg] invert-100 dark:invert-0", item.className)}
           icon={item.icon} />
       ))}
     </BentoGrid>
@@ -84,6 +83,7 @@ const SkeletonOne = () => {
     </motion.div>
   );
 };
+
 const SkeletonTwo = () => {
   const variants = {
     initial: {
@@ -280,7 +280,7 @@ const items = [
   {
     title: "AI-Powered Code Editing",
     description: (
-      <span className="text-sm">
+      <span className="text-sm ">
         Edit code like in VS Code, with AI-enhanced autocomplete and inline suggestions.
       </span>
     ),

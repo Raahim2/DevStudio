@@ -26,9 +26,9 @@ const Logo = ({ theme, mounted }) => {
   return (
     <div className="w-[80px] h-auto">
       {theme === 'dark' ? (
-        <img src="/light_logo.webp" alt="Dark Logo" className="h-16 w-auto" />
+        <img src="/logo-light.png" alt="light Logo" className="h-16 w-auto" />
       ) : (
-        <img src="/dark_logo.webp" alt="Light Logo" className="h-16 w-auto" />
+        <img src="/logo-dark.png" alt="Dark Logo" className="h-16 w-auto" />
       )}
     </div>
   );
@@ -90,7 +90,7 @@ const Navbar = () => {
       {/* Right Side: Button + Theme Toggle */}
       <div className="flex items-center space-x-4"> {/* Use flex to align items */}
         <Link
-        href="https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio.Setup.0.1.0.exe"
+        href="https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio.Setup.0.1.1.exe"
         className={buttonLinkClasses}
         target="_blank"
         rel="noopener noreferrer"

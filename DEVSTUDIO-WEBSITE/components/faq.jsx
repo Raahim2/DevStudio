@@ -43,14 +43,14 @@ const FAQ = () => {
     // Main container: Centered, max-width, padding for overall spacing
     <div className="w-full max-w-3xl mx-auto px-4 py-8 md:py-12">
       {/* Title */}
-      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+      {/* <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-4 text-gray-900 dark:text-white">
         Frequently Asked Questions
-      </h2>
+      </h2> */}
 
       {/* Subtitle / TLDR */}
-      <p className="text-sm sm:text-base text-center text-neutral-600 dark:text-neutral-400 mb-8 md:mb-12">
+      {/* <p className="text-sm sm:text-base text-center text-neutral-600 dark:text-neutral-400 mb-8 md:mb-12">
         TLDR: The app prioritizes privacy; your data stays local unless you initiate external actions.
-      </p>
+      </p> */}
 
       {/* FAQ List Container */}
       <div className="space-y-3"> {/* Adds vertical space between each FAQ item */}
