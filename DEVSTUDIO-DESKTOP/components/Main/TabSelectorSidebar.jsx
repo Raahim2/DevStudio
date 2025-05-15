@@ -20,7 +20,8 @@ const TabSelectorSidebar = ({ activeTab, setActiveTab }) => {
       not-only:w-16 flex flex-col items-center py-4 space-y-6 h-full
       bg-gray-100  /* Light mode: slightly off-white */
       [.dark_&]:bg-neutral-900 /* [.dark_&] mode: VS Code like very [.dark_&] gray/off-black */
-    ">
+      border-r border-gray-300 /* Light mode: light gray */
+      [.dark_&]:border-neutral-700 /* [.dark_&] mode: dark gray */">
       {sidebarItems.map((item, index) => (
         <button
           key={index}

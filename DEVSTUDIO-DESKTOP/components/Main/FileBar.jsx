@@ -195,7 +195,7 @@ const DirectoryItem = React.memo(({
 
     const itemRowContent = isRenamingThis ? (
         <>
-            {item.type === 'file' ? <FiFile size={13} className="mr-1.5 text-blue-500 dark:text-blue-400 flex-shrink-0" /> : <FiFolder size={13} className="mr-1.5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />}
+            {item.type === 'file' ? <FiFile size={13} className="mr-1.5 text-blue-500 [.dark_&]:text-white flex-shrink-0" /> : <FiFolder size={13} className="mr-1.5 text-yellow-500 [.dark_&]:text-yellow-400 flex-shrink-0" />}
             <input
                 ref={inputRef}
                 type="text"
@@ -203,16 +203,16 @@ const DirectoryItem = React.memo(({
                 onChange={handleInputChange}
                 onBlur={handleRenameSubmit}
                 onKeyDown={handleKeyDown}
-                className="flex-grow bg-white dark:bg-gray-600 text-black dark:text-white border border-blue-500 rounded px-1 py-1 text-xs outline-none min-w-0"
+                className="flex-grow bg-white [.dark_&]:bg-neutral-800 text-black [.dark_&]:text-white border border-blue-500 rounded px-1 py-1 text-xs outline-none min-w-0"
                 onClick={(e) => e.stopPropagation()}
             />
         </>
     ) : (
         <>
             {item.type === 'directory' && (isOpen ? <FiChevronDown size={14} className="mr-1 flex-shrink-0" /> : <FiChevronRight size={14} className="mr-1 flex-shrink-0" />)}
-            {item.type === 'file' && <FiFile size={13} className="mr-1.5 text-blue-500 dark:text-blue-400 flex-shrink-0" />}
-            {item.type === 'directory' && !isOpen && <FiFolder size={13} className="mr-1.5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />}
-            {item.type === 'directory' && isOpen && <FiFolder size={13} className="mr-1.5 text-yellow-600 dark:text-yellow-500 flex-shrink-0" />}
+            {item.type === 'file' && <FiFile size={13} className="mr-1.5 text-blue-500 [.dark_&]:text-white flex-shrink-0" />}
+            {item.type === 'directory' && !isOpen && <FiFolder size={13} className="mr-1.5 text-yellow-500 [.dark_&]:text-yellow-400 flex-shrink-0" />}
+            {item.type === 'directory' && isOpen && <FiFolder size={13} className="mr-1.5 text-yellow-600 [.dark_&]:text-yellow-500 flex-shrink-0" />}
             <span className="truncate flex-grow">{displayName}</span>
         </>
     );
@@ -220,7 +220,7 @@ const DirectoryItem = React.memo(({
     return (
         <div className="text-sm">
             <div
-                className={`flex items-center py-1 px-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded cursor-pointer select-none group relative ${isDragOver && item.type === 'directory' ? 'bg-blue-100 dark:bg-blue-700 ring-1 ring-blue-500' : ''}`}
+                className={`flex items-center py-1 px-2 hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-800 [.dark_&]:text-white  rounded cursor-pointer select-none group relative ${isDragOver && item.type === 'directory' ? 'bg-blue-100 [.dark_&]:bg-blue-700 ring-1 ring-blue-500' : ''}`}
                 style={{ paddingLeft: `${level * 12 + 8}px` }}
                 onClick={handleSelect}
                 onContextMenu={handleRightClick}
@@ -258,7 +258,7 @@ const DirectoryItem = React.memo(({
 
             {showMyInternalCreationInput && (
                 <div className="flex items-center py-1" style={{ paddingLeft: `${(level + 1) * 12 + 8}px` }}>
-                    {creatingItem.type === 'file' ? <FiFile size={13} className="mr-1.5 text-blue-500 dark:text-blue-400 flex-shrink-0" /> : <FiFolder size={13} className="mr-1.5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />}
+                    {creatingItem.type === 'file' ? <FiFile size={13} className="mr-1.5 text-blue-500 [.dark_&]:text-white flex-shrink-0" /> : <FiFolder size={13} className="mr-1.5 text-yellow-500 [.dark_&]:text-yellow-400 flex-shrink-0" />}
                     <input
                         ref={inputRef}
                         type="text"
@@ -274,7 +274,7 @@ const DirectoryItem = React.memo(({
                             }
                         }}
                         onKeyDown={handleKeyDown}
-                        className="flex-grow bg-white dark:bg-gray-600 text-black dark:text-white border border-blue-500 rounded px-1 py-1 text-xs outline-none min-w-0"
+                        className="flex-grow bg-white [.dark_&]:bg-neutral-800 text-black [.dark_&]:text-white border border-blue-500 rounded px-1 py-1 text-xs outline-none min-w-0"
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>
@@ -282,18 +282,18 @@ const DirectoryItem = React.memo(({
 
             {contextMenu && contextMenu.itemPath === item.path && (
                 <div
-                    className="absolute z-50 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg py-1 text-xs"
+                    className="absolute z-50 bg-white [.dark_&]:bg-neutral-800 border border-neutral-300 [.dark_&]:border-neutral-600 rounded shadow-lg py-1 text-xs"
                     style={{ top: contextMenu.y, left: contextMenu.x }}
                     onClick={(e) => e.stopPropagation()}
                 >
                     {item.type === 'directory' && (
                         <>
-                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'file', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><FiPlus className="mr-2" /> New File</button>
-                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'directory', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><FiFolderPlus className="mr-2" /> New Folder</button>
+                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'file', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center"><FiPlus className="mr-2" /> New File</button>
+                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'directory', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center"><FiFolderPlus className="mr-2" /> New Folder</button>
                         </>
                     )}
-                    <button onClick={() => { setCreatingItem(null); setRenamingItem({ path: item.path, name: item.name }); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"><FiEdit2 className="mr-2" /> Rename</button>
-                    <button onClick={() => { handleDelete(); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-red-100 dark:hover:bg-red-700/50 text-red-600 dark:text-red-400 flex items-center"><FiTrash2 className="mr-2" /> Delete</button>
+                    <button onClick={() => { setCreatingItem(null); setRenamingItem({ path: item.path, name: item.name }); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center"><FiEdit2 className="mr-2" /> Rename</button>
+                    <button onClick={() => { handleDelete(); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-red-100 [.dark_&]:hover:bg-red-700/50 text-red-600 [.dark_&]:text-red-400 flex items-center"><FiTrash2 className="mr-2" /> Delete</button>
                 </div>
             )}
         </div>
@@ -475,28 +475,28 @@ const FileBar = ({ directoryTree, selectedFolderPath, onRefreshNeeded, onError, 
 
     if (!selectedFolderPath) {
         return (
-            <aside className="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+            <aside className="w-64 bg-neutral-50 [.dark_&]:bg-neutral-800 border-r border-neutral-200 [.dark_&]:border-neutral-700 p-4 text-center text-neutral-500 [.dark_&]:text-neutral-400 text-sm">
                 No folder selected.
             </aside>
         );
     }
     if (!directoryTree && !displayedTree && selectedFolderPath) {
          return (
-             <aside className="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col">
+             <aside className="w-64 bg-neutral-50 [.dark_&]:bg-neutral-800 border-r border-neutral-200 [.dark_&]:border-neutral-700 p-4 flex flex-col">
                  <div className="mb-3 flex justify-between items-center">
-                     <h2 className="text-xs font-semibold uppercase text-gray-600 dark:text-gray-400">
+                     <h2 className="text-xs font-semibold uppercase text-neutral-600 [.dark_&]:text-neutral-400">
                          {selectedFolderPath ? selectedFolderPath.split(pathSeparator).pop() : 'Files'}
                      </h2>
                      <button
                          onClick={onRefreshNeeded}
-                         className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white rounded focus:outline-none"
+                         className="p-1 text-neutral-500 hover:text-neutral-700 [.dark_&]:text-neutral-400 [.dark_&]:hover:text-white rounded focus:outline-none"
                          title="Refresh file tree"
                          disabled={isOperating}
                      >
                          <FiRefreshCw size={14} className={isOperating ? 'animate-spin' : ''}/>
                      </button>
                  </div>
-                 <div className="text-center text-gray-500 dark:text-gray-400 text-sm flex-1 flex items-center justify-center">
+                 <div className="text-center text-neutral-500 [.dark_&]:text-neutral-400 text-sm flex-1 flex items-center justify-center">
                      Loading tree data...
                  </div>
              </aside>
@@ -506,32 +506,32 @@ const FileBar = ({ directoryTree, selectedFolderPath, onRefreshNeeded, onError, 
     const showTopLevelCreationInput = creatingItem && creatingItem.parentPath === selectedFolderPath && creatingItem.type;
 
     return (
-        <aside className="w-64 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
-            <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+        <aside className="w-64 bg-neutral-50 [.dark_&]:bg-neutral-800 border-r border-neutral-200 [.dark_&]:border-neutral-700 flex flex-col overflow-hidden">
+            <div className="p-2 border-b border-neutral-200 [.dark_&]:border-neutral-700">
                 <div className="flex justify-between items-center mb-1.5">
-                     <h2 className="text-xs font-semibold uppercase text-gray-600 dark:text-gray-400 truncate flex-1 pr-2" title={selectedFolderPath}>
+                     <h2 className="text-xs font-semibold uppercase text-neutral-600 [.dark_&]:text-neutral-400 truncate flex-1 pr-2" title={selectedFolderPath}>
                          {directoryTree?.name || selectedFolderPath.split(pathSeparator).pop() || 'Files'}
                      </h2>
                     <div className="flex items-center space-x-1">
-                        <button onClick={() => handleCreateTopLevel('file')} title="New File in Root" className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" disabled={isOperating || !!renamingItem || !!creatingItem}><FiPlus size={14} /></button>
-                        <button onClick={() => handleCreateTopLevel('directory')} title="New Folder in Root" className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" disabled={isOperating || !!renamingItem || !!creatingItem}><FiFolderPlus size={14} /></button>
-                        <button onClick={onRefreshNeeded} title="Refresh Tree" className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" disabled={isOperating}><FiRefreshCw size={14} className={isOperating ? 'animate-spin' : ''} /></button>
+                        <button onClick={() => handleCreateTopLevel('file')} title="New File in Root" className="p-1 hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-800 [.dark_&]:text-neutral-200 rounded" disabled={isOperating || !!renamingItem || !!creatingItem}><FiPlus size={14} /></button>
+                        <button onClick={() => handleCreateTopLevel('directory')} title="New Folder in Root" className="p-1 hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-800 [.dark_&]:text-neutral-200 rounded" disabled={isOperating || !!renamingItem || !!creatingItem}><FiFolderPlus size={14} /></button>
+                        <button onClick={onRefreshNeeded} title="Refresh Tree" className="p-1 hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-800 [.dark_&]:text-neutral-200 rounded" disabled={isOperating}><FiRefreshCw size={14} className={isOperating ? 'animate-spin' : ''} /></button>
                     </div>
                 </div>
                 <input
                     type="text" placeholder="Search files..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-2 py-1 text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="[.dark_&]:text-neutral-200 w-full px-2 py-1 text-xs bg-white [.dark_&]:bg-neutral-800 border border-neutral-300 [.dark_&]:border-neutral-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     disabled={isOperating || !!renamingItem || !!creatingItem}
                 />
             </div>
 
             <div
-                className={`flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent p-1 ${isRootDragOver ? 'bg-blue-100 dark:bg-blue-900/30 ring-1 ring-inset ring-blue-500' : ''}`}
+                className={`flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-300 [.dark_&]:scrollbar-thumb-neutral-600 scrollbar-track-transparent p-1 ${isRootDragOver ? 'bg-blue-100 [.dark_&]:bg-blue-900/30 ring-1 ring-inset ring-blue-500' : ''}`}
                 onDrop={handleRootDrop} onDragOver={handleRootDragOver} onDragLeave={handleRootDragLeave}
             >
                 {showTopLevelCreationInput && (
                      <div className="flex items-center py-1 px-2" style={{ paddingLeft: `8px` }}>
-                         {creatingItem.type === 'file' ? <FiFile size={13} className="mr-1.5 text-blue-500 dark:text-blue-400 flex-shrink-0" /> : <FiFolder size={13} className="mr-1.5 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />}
+                         {creatingItem.type === 'file' ? <FiFile size={13} className="mr-1.5 text-blue-500 [.dark_&]:text-white flex-shrink-0" /> : <FiFolder size={13} className="mr-1.5 text-yellow-500 [.dark_&]:text-yellow-400 flex-shrink-0" />}
                          <input
                              ref={topLevelInputRef}
                              type="text"
@@ -561,7 +561,7 @@ const FileBar = ({ directoryTree, selectedFolderPath, onRefreshNeeded, onError, 
                                      setTopLevelInputValue('');
                                  }
                              }}
-                             className="flex-grow bg-white dark:bg-gray-600 text-black dark:text-white border border-blue-500 rounded px-1 py-0 text-xs outline-none min-w-0"
+                             className="flex-grow bg-white [.dark_&]:bg-neutral-800 text-black [.dark_&]:text-white border border-blue-500 rounded px-1 py-0 text-xs outline-none min-w-0"
                              onClick={(e) => e.stopPropagation()}
                          />
                      </div>
@@ -586,13 +586,13 @@ const FileBar = ({ directoryTree, selectedFolderPath, onRefreshNeeded, onError, 
                         isOperatingParent={isOperating}
                     />
                 ) : searchTerm && !displayedTree && !showTopLevelCreationInput ? (
-                    <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">No files match "{searchTerm}".</div>
+                    <div className="p-4 text-center text-xs text-neutral-500 [.dark_&]:text-neutral-400">No files match "{searchTerm}".</div>
                 ) : !displayedTree && !showTopLevelCreationInput ? (
-                     <div className="p-4 text-center text-xs text-gray-500 dark:text-gray-400">Project files will appear here.</div>
+                     <div className="p-4 text-center text-xs text-neutral-500 [.dark_&]:text-neutral-400">Project files will appear here.</div>
                 ) : null }
             </div>
             {isOperating && (
-                <div className="p-2 text-xs text-center text-blue-600 dark:text-blue-400 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-2 text-xs text-center text-blue-600 [.dark_&]:text-white border-t border-neutral-200 [.dark_&]:border-neutral-700">
                     Processing...
                 </div>
             )}

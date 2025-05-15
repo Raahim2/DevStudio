@@ -75,15 +75,15 @@ const RepoSetup = ({
 
 
     return (
-        <div className="p-6 bg-gray-50 flex-1 overflow-y-auto">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Repository Setup</h2>
+        <div className="p-6 bg-gray-50 [.dark_&]:bg-neutral-900 flex-1 overflow-y-auto">
+            <h2 className="text-xl font-semibold text-gray-700 [.dark_&]:text-neutral-200 mb-4">Repository Setup</h2>
             <SetupError error={setupError || internalError} />
 
             {!isRepo ? (
                 // Option 1: Initialize
-                <div className="mb-6 p-4 border rounded-md bg-white shadow-sm">
-                    <h3 className="font-semibold text-lg text-gray-700 mb-3">Initialize Local Repository</h3>
-                    <p className="text-gray-600 mb-4">Turn this folder into a Git repository to start tracking changes.</p>
+                <div className="mb-6 p-4 border rounded-md bg-white [.dark_&]:bg-neutral-800 [.dark_&]:border-neutral-700 shadow-sm">
+                    <h3 className="font-semibold text-lg text-gray-700 [.dark_&]:text-neutral-200 mb-3">Initialize Local Repository</h3>
+                    <p className="text-gray-600 [.dark_&]:text-neutral-400 mb-4">Turn this folder into a Git repository to start tracking changes.</p>
                     <button
                         onClick={onInitializeRepo}
                         disabled={isInitializing}
@@ -92,28 +92,28 @@ const RepoSetup = ({
                         {isInitializing ? <FiRefreshCw className="animate-spin mr-2" /> : <FiPlusSquare className="mr-2"/>}
                         Initialize Repository
                     </button>
-                    {isInitializing && <p className="text-sm text-gray-500 mt-2">Initializing...</p>}
+                    {isInitializing && <p className="text-sm text-gray-500 [.dark_&]:text-neutral-400 mt-2">Initializing...</p>}
                 </div>
             ) : (
                 // Options 2 & 3: Link/Create Remote
-                <div className="mb-6 p-4 border rounded-md bg-white shadow-sm">
-                    <h3 className="font-semibold text-lg text-gray-700 mb-3">Connect to GitHub Remote</h3>
-                     <p className="text-gray-700 font-medium mb-1">Local repository exists.</p>
-                    <p className="text-gray-600 mb-4">Link it to a GitHub repository to push, pull, and collaborate.</p>
+                <div className="mb-6 p-4 border rounded-md bg-white [.dark_&]:bg-neutral-800 [.dark_&]:border-neutral-700 shadow-sm">
+                    <h3 className="font-semibold text-lg text-gray-700 [.dark_&]:text-neutral-200 mb-3">Connect to GitHub Remote</h3>
+                     <p className="text-gray-700 [.dark_&]:text-neutral-300 font-medium mb-1">Local repository exists.</p>
+                    <p className="text-gray-600 [.dark_&]:text-neutral-400 mb-4">Link it to a GitHub repository to push, pull, and collaborate.</p>
 
                     {/* Link Existing */}
-                    <div className="mb-5 p-4 border rounded bg-gray-100">
-                        <h4 className="font-semibold text-gray-700 mb-2 flex items-center"><FiGithub className="mr-2"/> Link to Existing GitHub Repository</h4>
+                    <div className="mb-5 p-4 border rounded bg-gray-100 [.dark_&]:bg-neutral-700 [.dark_&]:border-neutral-600">
+                        <h4 className="font-semibold text-gray-700 [.dark_&]:text-neutral-200 mb-2 flex items-center"><FiGithub className="mr-2"/> Link to Existing GitHub Repository</h4>
                         {!accessToken ? (
-                             <p className="text-sm text-orange-600">Add your GitHub Personal Access Token in settings to list your repositories.</p>
+                             <p className="text-sm text-orange-600 [.dark_&]:text-orange-400">Add your GitHub Personal Access Token in settings to list your repositories.</p>
                         ) : isInitializing && userRepos.length === 0 ? (
-                             <p className="text-sm text-gray-500 flex items-center"><FiRefreshCw className="animate-spin mr-2"/> Loading repositories...</p>
+                             <p className="text-sm text-gray-500 [.dark_&]:text-neutral-400 flex items-center"><FiRefreshCw className="animate-spin mr-2"/> Loading repositories...</p>
                         ) : (
                             <>
                                 <select
                                     value={selectedRemoteRepo}
                                     onChange={handleSelectChange}
-                                    className="w-full p-2 border rounded mb-3 text-sm bg-white disabled:bg-gray-100"
+                                    className="w-full p-2 border rounded mb-3 text-sm bg-white [.dark_&]:bg-neutral-700 [.dark_&]:border-neutral-600 [.dark_&]:text-neutral-200 disabled:bg-gray-100 [.dark_&]:disabled:bg-neutral-800"
                                     disabled={isInitializing}
                                 >
                                     <option value="">Select your repository...</option>
@@ -122,7 +122,7 @@ const RepoSetup = ({
                                     ))}
                                 </select>
                                 {userRepos.length === 0 && !isInitializing && (
-                                     <p className="text-sm text-gray-500 mb-3">No repositories found or failed to load. Try refreshing setup.</p>
+                                     <p className="text-sm text-gray-500 [.dark_&]:text-neutral-400 mb-3">No repositories found or failed to load. Try refreshing setup.</p>
                                 )}
                                 <button
                                     onClick={handleLinkClick}
@@ -137,10 +137,10 @@ const RepoSetup = ({
                     </div>
 
                     {/* Create and Link New */}
-                    <div className="p-4 border rounded bg-gray-100">
-                        <h4 className="font-semibold text-gray-700 mb-2 flex items-center"><FiGithub className="mr-2"/> Create & Link New GitHub Repository</h4>
+                    <div className="p-4 border rounded bg-gray-100 [.dark_&]:bg-neutral-700 [.dark_&]:border-neutral-600">
+                        <h4 className="font-semibold text-gray-700 [.dark_&]:text-neutral-200 mb-2 flex items-center"><FiGithub className="mr-2"/> Create & Link New GitHub Repository</h4>
                          {!accessToken ? (
-                              <p className="text-sm text-orange-600">Add your GitHub Personal Access Token in settings to create repositories.</p>
+                              <p className="text-sm text-orange-600 [.dark_&]:text-orange-400">Add your GitHub Personal Access Token in settings to create repositories.</p>
                          ) : (
                              <>
                                 <input
@@ -148,10 +148,10 @@ const RepoSetup = ({
                                     placeholder="New repository name (e.g., my-project)"
                                     value={newRepoName}
                                     onChange={handleInputChange}
-                                    className="w-full p-2 border rounded mb-2 text-sm bg-white disabled:bg-gray-100"
+                                    className="w-full p-2 border rounded mb-2 text-sm bg-white [.dark_&]:bg-neutral-700 [.dark_&]:border-neutral-600 [.dark_&]:text-neutral-200 disabled:bg-gray-100 [.dark_&]:disabled:bg-neutral-800"
                                     disabled={isInitializing}
                                 />
-                                <label className="flex items-center mb-3 text-sm text-gray-600">
+                                <label className="flex items-center mb-3 text-sm text-gray-600 [.dark_&]:text-neutral-400">
                                     <input
                                         type="checkbox"
                                         checked={isPrivateRepo}
@@ -177,7 +177,7 @@ const RepoSetup = ({
 
              <button
                 onClick={onCloseSetup}
-                className="mt-4 text-sm text-blue-600 hover:underline"
+                className="mt-4 text-sm text-blue-600 [.dark_&]:text-blue-400 hover:underline"
                 disabled={isInitializing}
             >
                 Close Setup & Refresh Status

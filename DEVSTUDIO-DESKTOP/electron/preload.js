@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
         ipcRenderer.on('github-token', subscription);
         return () => ipcRenderer.removeListener('github-token', subscription);
     },
+    openExternalLink: (url) => {
+        ipcRenderer.send('open-external-link', url);
+    },
 
     selectFolder: () => ipcRenderer.invoke('dialog:openDirectory'),
     getFolderStructure: (folderPath) => ipcRenderer.invoke('fs:getFolderStructure', folderPath),

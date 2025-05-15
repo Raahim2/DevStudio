@@ -460,7 +460,7 @@ export default function Home() {
 
     const handleRefreshNeeded = useCallback(() => {
         if (selectedFolderPath) {
-            fetchDirectoryStructure(selectedFolderPath, false);
+            fetchDirectoryStructure(selectedFolderPath, true);
         }
     }, [selectedFolderPath, fetchDirectoryStructure]);
 

@@ -719,7 +719,7 @@ const CommitTab = ({ selectedFolderPath, accessToken, activeTab  , onGithubLogin
 
     // 6. Render Main Commit View using Child Components
     return (
-        <div className="flex flex-col h-full bg-gray-50 text-gray-800">
+        <div className="flex flex-col h-full bg-gray-50 [.dark_&]:bg-neutral-900 text-gray-800 [.dark_&]:text-neutral-200">
             <CommitPanelHeader
                 gitStatus={gitStatus} // Pass full status object
                 isLoading={isLoading} // Pass individual loading states
@@ -736,7 +736,7 @@ const CommitTab = ({ selectedFolderPath, accessToken, activeTab  , onGithubLogin
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Panel: Changes Lists */}
-                <div className="w-1/3 min-w-[280px] max-w-[450px] border-r border-gray-300 bg-white flex flex-col overflow-y-auto">
+                <div className="w-1/3 min-w-[280px] max-w-[450px] border-r border-gray-300 [.dark_&]:border-neutral-700 bg-white [.dark_&]:bg-neutral-800 flex flex-col overflow-y-auto">
                     <ChangesList
                         title="Staged"
                         files={currentlyStagedFiles}
@@ -760,7 +760,7 @@ const CommitTab = ({ selectedFolderPath, accessToken, activeTab  , onGithubLogin
                 </div>
 
                 {/* Right Panel: Diff Viewer and Commit Area */}
-                <div className="flex-1 flex flex-col overflow-hidden bg-gray-100">
+                <div className="flex-1 flex flex-col overflow-hidden bg-gray-100 [.dark_&]:bg-neutral-850">
                     <DiffViewerPanel
                         selectedFileForDiff={selectedFileForDiff}
                         diffContent={diffContent}

@@ -36,106 +36,80 @@ const CommitPanelHeader = ({
     }
 
     return (
-        <div className="p-3 border-b border-gray-300 bg-white flex items-center justify-between text-sm flex-wrap gap-y-2 gap-x-4">
+        <div className="p-3 border-b border-neutral-300 [.dark_&]:border-neutral-700 bg-white [.dark_&]:bg-neutral-800 flex items-center justify-between text-sm flex-wrap gap-y-2 gap-x-4">
             {/* Branch Info Section */}
             <div className="flex items-center flex-wrap gap-x-3">
                 {current ? (
-                     <span className="flex items-center font-semibold" title={`Current branch: ${current}`}>
-                        <FiGitBranch className="mr-1.5 text-gray-600 flex-shrink-0" />
+                     <span className="flex items-center font-semibold [.dark_&]:text-neutral-200" title={`Current branch: ${current}`}>
+                        <FiGitBranch className="mr-1.5 text-neutral-600 [.dark_&]:text-neutral-400 flex-shrink-0" />
                         {current}
                     </span>
-                ) : gitStatus ? ( // Only show detached head if status object exists but no current branch
-                     <span className="flex items-center font-semibold text-orange-600" title="Detached HEAD state">
+                ) : gitStatus ? (
+                     <span className="flex items-center font-semibold text-orange-600 [.dark_&]:text-orange-400" title="Detached HEAD state">
                          <FiAlertCircle className="mr-1.5 flex-shrink-0" />
                          Detached HEAD
                      </span>
-                 ) : null /* Don't show anything if status isn't loaded */}
+                 ) : null}
 
                 {tracking && (
-                    <span className="text-gray-500 flex items-center" title={`Tracking remote branch: ${tracking}`}>
+                    <span className="text-neutral-500 [.dark_&]:text-neutral-400 flex items-center" title={`Tracking remote branch: ${tracking}`}>
                         <VscSync className="inline mr-1 flex-shrink-0"/> {getShortTrackingName(tracking)}
-                         {ahead > 0 && <span className="text-blue-500 ml-1.5 flex items-center" title={`${ahead} commit(s) ahead of remote`}> <FiArrowUp className="inline mr-0.5"/> {ahead}</span>}
-                         {behind > 0 && <span className="text-blue-500 ml-1.5 flex items-center" title={`${behind} commit(s) behind remote`}> <FiArrowDown className="inline mr-0.5"/> {behind}</span>}
+                         {ahead > 0 && <span className="text-blue-500 [.dark_&]:text-blue-400 ml-1.5 flex items-center" title={`${ahead} commit(s) ahead of remote`}> <FiArrowUp className="inline mr-0.5"/> {ahead}</span>}
+                         {behind > 0 && <span className="text-blue-500 [.dark_&]:text-blue-400 ml-1.5 flex items-center" title={`${behind} commit(s) behind remote`}> <FiArrowDown className="inline mr-0.5"/> {behind}</span>}
                     </span>
                 )}
 
-                {/* Link to GitHub Repo */}
                 {remoteUrl && (
                     <a
-                        href={remoteUrl.replace(/\.git$/, '')} // Attempt to create browseable URL
+                        href={remoteUrl.replace(/\.git$/, '')}
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Open remote repository on GitHub"
-                        className="text-blue-600 hover:underline flex items-center"
+                        className="text-blue-600 [.dark_&]:text-blue-400 hover:underline flex items-center"
                     >
                         <FiGithub className="inline mr-1 flex-shrink-0"/> GitHub
                     </a>
                 )}
 
-                {/* Configure Remote Button (Show if repo exists, has branch, but no remote URL) */}
-                 {!remoteUrl && isRepo && current && (
+                {!remoteUrl && isRepo && current && (
                      <button
                         onClick={onConfigureRemote}
-                        className="text-blue-600 hover:underline text-xs flex items-center"
+                        className="text-blue-600 [.dark_&]:text-blue-400 hover:underline text-xs flex items-center"
                         title="Configure the remote repository URL (e.g., origin)"
                         disabled={anyLoading}
                      >
                         <FiGithub className="mr-1"/> Configure Remote
                      </button>
                  )}
-
-                 {/* Branch Not Tracking Hint (Show if remote exists, no tracking info, AND not behind)
-                 {!tracking && current && remoteUrl && behind === 0 && (
-                     <span className="text-orange-500 text-xs flex items-center" title="Push to publish this branch and set up tracking information">
-                        <FiAlertCircle className="mr-1"/> Branch not tracking remote
-                     </span>
-                 )} */}
             </div>
 
             {/* Sync Actions Section */}
             <div className="flex items-center space-x-2 flex-shrink-0">
-                 {/* Fetch Button */}
                  <button
                     onClick={onPull}
-                    disabled={anyLoading || !remoteUrl} // Disable if busy or no remote configured
+                    disabled={anyLoading || !remoteUrl}
                     title={!remoteUrl ? "Configure remote first" : "Fetch changes from remote"}
-                    className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-1.5 rounded hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed [.dark_&]:text-neutral-200"
                 >
                     {isFetching ? <FiRefreshCw className="animate-spin" /> : <VscCloudDownload size={18}/>}
                 </button>
                 
-                {/* Push / Publish Button */}
                 <button
-                    onClick={onPush} // Calls handlePushOrPublish
-                    disabled={
-                        anyLoading ||
-                        !remoteUrl ||
-                        behind > 0 || // Cannot push if behind
-                        (tracking && ahead === 0) // Cannot push if tracking and up-to-date
-                    }
-                    title={ // Provide informative title based on state
-                        !remoteUrl ? "Configure remote first" :
-                        anyLoading ? "Action in progress..." :
-                        behind > 0 ? `Pull ${behind} changes before pushing` :
-                        !tracking ? `Push to Github` : 
-                        ahead > 0 ? `Push ${ahead} commit(s) to ${remoteName}/${current || ''}` :
-                        "Push (already up-to-date)"
-                    }
-                    className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center"
+                    onClick={onPush}
+                    disabled={anyLoading || !remoteUrl || behind > 0 || (tracking && ahead === 0)}
+                    title={!remoteUrl ? "Configure remote first" : anyLoading ? "Action in progress..." : behind > 0 ? `Pull ${behind} changes before pushing` : !tracking ? `Push to Github` : ahead > 0 ? `Push ${ahead} commit(s) to ${remoteName}/${current || ''}` : "Push (already up-to-date)"}
+                    className="px-3 py-1.5 bg-blue-600 [.dark_&]:bg-blue-700 text-white rounded text-xs font-medium hover:bg-blue-700 [.dark_&]:hover:bg-blue-800 disabled:bg-neutral-400 [.dark_&]:disabled:bg-neutral-600 disabled:cursor-not-allowed flex items-center"
                 >
                     {isPushing ? <FiRefreshCw className="animate-spin mr-1" /> : <VscRepoPush className="mr-1" size={16}/>}
-                    {/* Button Text Logic: Publish or Push */}
                     {!tracking ? 'Push' : (ahead > 0 ? `Push (${ahead})` : 'Push')}
                 </button>
 
-                 {/* Refresh Status Button */}
                  <button
                     onClick={onRefreshStatus}
                     title="Refresh Git status"
-                    className="p-1.5 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={anyLoading} // Disable refresh during any other action
+                    className="p-1.5 rounded hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed [.dark_&]:text-neutral-200"
+                    disabled={anyLoading}
                 >
-                    {/* Show spin only during general loading (initial fetch), not other actions */}
                     <FiRefreshCw className={isLoading && !isFetching && !isPushing && !isCommitting && !isInitializing ? 'animate-spin' : ''} />
                 </button>
             </div>

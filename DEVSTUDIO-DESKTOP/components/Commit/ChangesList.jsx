@@ -47,15 +47,15 @@ const ChangesList = ({
     };
 
     return (
-        <div className={`p-2 ${isStagedList ? 'border-b border-gray-200' : 'flex-1'}`}>
-            <div className="flex justify-between items-center mb-1 sticky top-0 bg-white z-10 py-1">
-                <h3 className="font-semibold text-xs text-gray-700 uppercase tracking-wider">
+        <div className={`p-2 ${isStagedList ? 'border-b border-gray-200 [.dark_&]:border-neutral-700' : 'flex-1'}`}>
+            <div className="flex justify-between items-center mb-1 sticky top-0 bg-white [.dark_&]:bg-neutral-800 z-10 py-1">
+                <h3 className="font-semibold text-xs text-gray-700 [.dark_&]:text-neutral-300 uppercase tracking-wider">
                     {title} ({files.length})
                 </h3>
                 {files.length > 0 && (
                     <button
                         onClick={onActionAll}
-                        className="text-xs text-blue-600 hover:underline disabled:opacity-50"
+                        className="text-xs text-blue-600 [.dark_&]:text-blue-400 hover:underline disabled:opacity-50"
                         disabled={actionInProgress}
                     >
                         {actionAllText}
@@ -63,7 +63,7 @@ const ChangesList = ({
                 )}
             </div>
             {files.length === 0 && (
-                <p className="text-xs text-gray-500 italic px-1 py-2">
+                <p className="text-xs text-gray-500 [.dark_&]:text-neutral-400 italic px-1 py-2">
                     {isStagedList ? 'No staged changes.' : 'No unstaged changes.'}
                 </p>
             )}
@@ -75,9 +75,11 @@ const ChangesList = ({
                             key={`${isStagedList ? 'staged' : 'unstaged'}-${file.path}`}
                             onClick={() => handleFileClick(file)}
                             title={file.path}
-                            className={`p-1.5 rounded flex items-center justify-between cursor-pointer hover:bg-gray-100 ${isSelected ? 'bg-blue-100 hover:bg-blue-100' : ''}`}
+                            className={`p-1.5 rounded flex items-center justify-between cursor-pointer hover:bg-gray-100 [.dark_&]:hover:bg-neutral-800 ${
+                                isSelected ? 'bg-blue-100 [.dark_&]:bg-blue-900/50 hover:bg-blue-100 [.dark_&]:hover:bg-blue-900/50' : ''
+                            }`}
                         >
-                            <span className="flex items-center flex-grow min-w-0"> {/* Allow truncation */}
+                            <span className="flex items-center flex-grow min-w-0">
                                 <button
                                     onClick={(e) => handleFileActionClick(e, file.path)}
                                     className={`mr-2 p-0.5 ${actionColor} leading-none flex-shrink-0 disabled:opacity-50`}
@@ -87,7 +89,7 @@ const ChangesList = ({
                                     <ActionIcon size={14}/>
                                  </button>
                                 {getFileStatusSymbol(file)}
-                                <span className="ml-1.5 truncate flex-grow">{file.path}</span>
+                                <span className="ml-1.5 truncate flex-grow [.dark_&]:text-neutral-200">{file.path}</span>
                             </span>
                         </li>
                     );

@@ -2,12 +2,12 @@
 
 import React, { useEffect, useMemo, useState, useCallback, useRef, memo } from 'react';
 import Editor, { useMonaco } from '@monaco-editor/react';
-import { FiLoader, FiAlertCircle, FiCode, FiX, FiCircle, FiImage, FiTerminal, FiPlay } from 'react-icons/fi'; 
-import { callGeminiForEdit } from '../../hooks/geminiUtils'; 
+import { FiLoader, FiAlertCircle, FiCode, FiX, FiCircle, FiImage, FiTerminal, FiPlay } from 'react-icons/fi';
+import { callGeminiForEdit } from '../../hooks/geminiUtils';
 import dynamic from 'next/dynamic';
-import ImageEditor from './ImageEditor'; 
+import ImageEditor from './ImageEditor';
 
-const TerminalComponent = dynamic(() => import('./Terminal'), { 
+const TerminalComponent = dynamic(() => import('./Terminal'), {
     ssr: false,
 });
 
@@ -52,16 +52,11 @@ const getRunCommand = (filePath, fileName, rootDir) => {
     if (!fileName || !filePath || !rootDir) return null;
     const extension = fileName.split('.').pop()?.toLowerCase();
     
-    // Make filePath relative to rootDir for commands, ensuring no leading slash for relative path
     let relativePath = filePath;
     if (filePath.startsWith(rootDir)) {
         relativePath = filePath.substring(rootDir.length).replace(/^[\/\\]+/, '');
     }
-    // If filePath is already relative (e.g. from a file tree that only provides relative paths)
-    // then ensure it doesn't have a leading slash if rootDir is the CWD.
-    // For this example, we assume relativePath is now correctly relative to rootDir.
-
-    // Quote the relative path for safety with spaces
+    
     const quotedRelativePath = `"${relativePath}"`;
 
     switch (extension) {
@@ -73,15 +68,10 @@ const getRunCommand = (filePath, fileName, rootDir) => {
             return `npx ts-node ${quotedRelativePath}`;
         case 'java':
             const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
-            // Java execution needs careful thought about classpath.
-            // This assumes the .class file will be in the same dir as .java, and rootDir is on classpath.
-            // For `java` command, `.` in classpath refers to `cwd`.
-            // If `javac` output goes to a `bin` folder, classpath needs to include that.
-            // Simplification: compile to same dir, then run.
             const dirOfFile = relativePath.substring(0, relativePath.lastIndexOf('/') > -1 ? relativePath.lastIndexOf('/') : 0 );
             const compileCommand = `javac ${quotedRelativePath}`;
-            const runCommand = `java -cp "${dirOfFile === '' ? '.' : dirOfFile}" ${baseName}`; // Adjust classpath if files are in rootDir vs subdirs.
-            return `${compileCommand} && ${runCommand}`; // This is a basic sequence.
+            const runCommand = `java -cp "${dirOfFile === '' ? '.' : dirOfFile}" ${baseName}`; 
+            return `${compileCommand} && ${runCommand}`; 
         case 'go':
             return `go run ${quotedRelativePath}`;
         case 'rb':
@@ -118,12 +108,12 @@ const PromptInput = ({ isOpen, onClose, onSubmit, prompt, setPrompt, isLoading, 
 
     return (
         <div
-            className="absolute z-30 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-300 dark:border-gray-600 w-full max-w-lg p-3"
+            className="absolute z-30 bg-white [.dark_&]:bg-neutral-800 rounded-md shadow-lg border border-neutral-300 [.dark_&]:border-neutral-600 w-full max-w-lg p-3"
             style={{ top: `${position.top}px`, left: `${position.left}px` }}
             onClick={(e) => e.stopPropagation()}
         >
             {error && (
-                <div className="mb-2 p-1.5 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-600 rounded-md text-red-700 dark:text-red-300 text-xs flex items-center space-x-1.5">
+                <div className="mb-2 p-1.5 bg-red-100 [.dark_&]:bg-red-900/50 border border-red-300 [.dark_&]:border-red-600 rounded-md text-red-700 [.dark_&]:text-red-300 text-xs flex items-center space-x-1.5">
                     <FiAlertCircle size={14} className="flex-shrink-0" />
                     <span>{error}</span>
                 </div>
@@ -133,7 +123,7 @@ const PromptInput = ({ isOpen, onClose, onSubmit, prompt, setPrompt, isLoading, 
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full p-2 border border-gray-300 dark:border-gray-500 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                className="w-full p-2 border border-neutral-300 [.dark_&]:border-neutral-500 rounded bg-white [.dark_&]:bg-neutral-700 text-neutral-900 [.dark_&]:text-neutral-100 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
                 rows="2"
                 placeholder="Describe how to change the selection (Enter to submit, Esc to cancel)"
                 disabled={isLoading}
@@ -141,7 +131,7 @@ const PromptInput = ({ isOpen, onClose, onSubmit, prompt, setPrompt, isLoading, 
             <div className="mt-2 flex justify-end space-x-2">
                 <button
                     onClick={onClose}
-                    className="px-3 py-1 text-xs rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50"
+                    className="px-3 py-1 text-xs rounded bg-neutral-200 [.dark_&]:bg-neutral-600 text-neutral-700 [.dark_&]:text-neutral-200 hover:bg-neutral-300 [.dark_&]:hover:bg-neutral-500 disabled:opacity-50"
                     disabled={isLoading}
                 >
                     Cancel
@@ -150,7 +140,7 @@ const PromptInput = ({ isOpen, onClose, onSubmit, prompt, setPrompt, isLoading, 
                     onClick={onSubmit}
                     className={`px-3 py-1 text-xs rounded flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed ${
                         isLoading
-                            ? 'bg-gray-400 dark:bg-gray-500 text-white dark:text-gray-300'
+                            ? 'bg-neutral-400 [.dark_&]:bg-neutral-500 text-white [.dark_&]:text-neutral-300'
                             : 'bg-blue-600 hover:bg-blue-700 text-white'
                     }`}
                     disabled={!prompt || isLoading}
@@ -215,6 +205,7 @@ const CodeEditor = ({
     const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const [runnableCommand, setRunnableCommand] = useState(null);
+    const [fontSize, setFontSize] = useState(16); // Initial font size
 
     useEffect(() => {
         if (activeFile && activeFile.path && activeFile.name && rootDir) {
@@ -260,7 +251,9 @@ const CodeEditor = ({
     const editorOptions = useMemo(() => ({
         readOnly: !activeFilePath || !!isGlobalFileLoading || !!globalLoadError || isGeminiLoading || isPromptInputOpen || activeFileIsImage,
         minimap: { enabled: !activeFileIsImage },
-        scrollBeyondLastLine: false, fontSize: 14, wordWrap: 'off',
+        scrollBeyondLastLine: false, 
+        fontSize: fontSize, // Controlled by React state
+        wordWrap: 'off',
         lineNumbers: activeFileIsImage ? 'off' : 'on',
         automaticLayout: true, tabSize: 4, insertSpaces: true,
         renderLineHighlight: activeFileIsImage ? 'none' : 'gutter',
@@ -268,7 +261,7 @@ const CodeEditor = ({
         glyphMargin: !activeFileIsImage, folding: !activeFileIsImage,
         lineDecorationsWidth: !activeFileIsImage ? 10 : 0,
         lineNumbersMinChars: !activeFileIsImage ? 5 : 0,
-    }), [activeFilePath, isGlobalFileLoading, globalLoadError, isGeminiLoading, isPromptInputOpen, activeFileIsImage]);
+    }), [activeFilePath, isGlobalFileLoading, globalLoadError, isGeminiLoading, isPromptInputOpen, activeFileIsImage, fontSize]); // Added fontSize to dependency array
 
     const editorTheme = isDarkMode ? 'vs-dark' : 'vs';
 
@@ -276,7 +269,7 @@ const CodeEditor = ({
         if (activeFileIsImage) return;
         if (isApiKeyMissing) {
              setGeminiError("Gemini API key is missing. Configure NEXT_PUBLIC_GEMINI_API.");
-             setPromptPosition({ top: 20, left: 20 }); // Fallback position
+             setPromptPosition({ top: 20, left: 20 }); 
              setIsPromptInputOpen(true); return;
         }
         if (!editorRef.current || !monaco) return;
@@ -356,10 +349,7 @@ const CodeEditor = ({
             console.error("electronAPI.executeCommand not available."); return;
         }
         if (!isTerminalOpen) setIsTerminalOpen(true);
-        // Execute after a short delay if terminal was just opened, to allow it to render.
-        // This is a pragmatic approach. A more robust solution might involve TerminalComponent
-        // emitting an event or resolving a promise when it's ready after becoming visible.
-        const delay = isTerminalOpen ? 0 : 150; // No delay if already open
+        const delay = isTerminalOpen ? 0 : 150; 
         setTimeout(() => {
             window.electronAPI.executeCommand({ command: runnableCommand, cwd: rootDir });
         }, delay);
@@ -384,10 +374,49 @@ const CodeEditor = ({
              }
         });
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyJ, toggleTerminal);
-        if (!isGlobalFileLoading && !globalLoadError && latestProps.current.activeFilePath && !isImageFile(activeFile?.name)) {
+        
+        // Add font size increase command (Ctrl/Cmd + =)
+        editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Equal, () => {
+            const currentEditor = editorRef.current;
+            if (currentEditor && monacoInstance) { // Ensure monacoInstance is available
+                const currentSize = currentEditor.getOption(monacoInstance.editor.EditorOption.fontSize);
+                const newSize = Math.min(currentSize + 1, 40); // Max font size 40
+                if (newSize !== currentSize) {
+                    currentEditor.updateOptions({ fontSize: newSize });
+                    setFontSize(newSize); // Sync React state
+                }
+            }
+        });
+
+        // Add font size decrease command (Ctrl/Cmd -)
+        editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Minus, () => {
+            const currentEditor = editorRef.current;
+            if (currentEditor && monacoInstance) { // Ensure monacoInstance is available
+                const currentSize = currentEditor.getOption(monacoInstance.editor.EditorOption.fontSize);
+                const newSize = Math.max(currentSize - 1, 6); // Min font size 6
+                if (newSize !== currentSize) {
+                    currentEditor.updateOptions({ fontSize: newSize });
+                    setFontSize(newSize); // Sync React state
+                }
+            }
+        });
+
+        // Initial focus logic
+        const currentActiveFileIsImage = isImageFile(latestProps.current.activeFilePath ? openFiles.find(f => f.path === latestProps.current.activeFilePath)?.name : null);
+        if (!isGlobalFileLoading && !globalLoadError && latestProps.current.activeFilePath && !currentActiveFileIsImage) {
              editor.focus();
         }
-    }, [handleOpenPromptInput, toggleTerminal, isGlobalFileLoading, globalLoadError, activeFile?.name, openFiles]);
+    }, [
+        handleOpenPromptInput, 
+        toggleTerminal, 
+        isGlobalFileLoading, 
+        globalLoadError, 
+        openFiles, // For currentActiveFileIsImage logic
+        // latestProps is a ref, its contents are accessed via .current so not needed in deps for value stability
+        // setFontSize is stable from useState, not needed in deps
+        // monacoInstance (from useMonaco or onMount) is also typically stable or available in scope
+    ]);
+
 
     const activeFileState = activeFilePath ? fileStates[activeFilePath] : null;
     const isActiveFileLoading = activeFileState?.isLoading ?? (activeFilePath ? !!isGlobalFileLoading : false);
@@ -398,11 +427,20 @@ const CodeEditor = ({
     const showLoadingState = isActiveFileLoading && activeFilePath;
     const showErrorState = !!activeFileLoadError && activeFilePath && !isActiveFileLoading;
 
+    // Effect for focusing editor when active file changes and is editable
+    useEffect(() => {
+        if (showEditorArea && !activeFileIsImage && !isPromptInputOpen && editorRef.current) {
+            // A small delay can sometimes help if focus is lost immediately after content update
+            setTimeout(() => editorRef.current?.focus(), 0);
+        }
+    }, [showEditorArea, activeFileIsImage, isPromptInputOpen, editorContent]);
+
+
     return (
-        <div className="flex flex-1 flex-col bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="flex flex-1 flex-col bg-white [.dark_&]:bg-neutral-900 overflow-hidden">
              <div
                 ref={tabsContainerRef}
-                className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex-shrink-0 h-[36px] no-scrollbar pr-2"
+                className="flex items-center justify-between border-b border-neutral-200 [.dark_&]:border-neutral-700 bg-neutral-100 [.dark_&]:bg-neutral-800 flex-shrink-0 h-[36px] no-scrollbar pr-2"
              >
                 <div className="flex items-center overflow-x-auto overflow-y-hidden flex-grow no-scrollbar h-full">
                     {openFiles.map(file => {
@@ -412,7 +450,7 @@ const CodeEditor = ({
                         const fileLoadError = state.error ?? null;
                         const isLoadingThisTab = state.isLoading ?? false;
                         const tabIsImage = isImageFile(file.name);
-                        const currentRunnableCommand = isActive ? runnableCommand : getRunCommand(file.path, file.name, rootDir);
+                        const currentRunnableCommandForTab = getRunCommand(file.path, file.name, rootDir);
 
 
                         return (
@@ -420,11 +458,11 @@ const CodeEditor = ({
                                 key={file.path} data-path={file.path}
                                 onClick={() => onTabSelect(file.path)}
                                 title={`${file.path}${isDirty && !tabIsImage ? ' (unsaved)' : ''}${fileLoadError ? ` (Error: ${fileLoadError})`: ''}`}
-                                className={`flex items-center justify-between h-full px-3 py-1 border-r border-gray-200 dark:border-gray-700 cursor-pointer text-sm whitespace-nowrap group ${
+                                className={`flex items-center justify-between h-full px-3 py-1 border-r border-neutral-200 [.dark_&]:border-neutral-700 cursor-pointer text-sm whitespace-nowrap group ${
                                     isActive
-                                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 border-t-2 border-t-blue-500 relative top-[-1px]'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                } ${fileLoadError ? 'text-red-600 dark:text-red-400' : ''}`}
+                                    ? 'bg-white [.dark_&]:bg-neutral-900 text-blue-600 [.dark_&]:text-blue-400 border-t-2 border-t-blue-500 relative top-[-1px]'
+                                    : 'bg-neutral-100 [.dark_&]:bg-neutral-800 text-neutral-600 [.dark_&]:text-neutral-400 hover:bg-neutral-200 [.dark_&]:hover:bg-neutral-700'
+                                } ${fileLoadError ? 'text-red-600 [.dark_&]:text-red-400' : ''}`}
                                 role="tab" aria-selected={isActive} aria-controls="editor-panel"
                             >
                                 {isLoadingThisTab ? ( <FiLoader className="animate-spin mr-1.5 flex-shrink-0" size={14} /> )
@@ -432,18 +470,18 @@ const CodeEditor = ({
                                  : tabIsImage ? ( <FiImage className="mr-1.5 flex-shrink-0" size={14} /> )
                                  : ( <FiCode className="mr-1.5 flex-shrink-0" size={14} /> )}
                                 <span className="truncate max-w-[150px] mr-1">{file.name}</span>
-                                {isActive && currentRunnableCommand && (
+                                {isActive && currentRunnableCommandForTab && ( // Use currentRunnableCommandForTab for the play button logic
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleRunFile(); }}
-                                        title={`Run ${file.name} (Cmd: ${currentRunnableCommand})`}
-                                        className="p-0.5 rounded hover:bg-green-200 dark:hover:bg-green-700 text-green-600 dark:text-green-400 flex-shrink-0 mx-1"
+                                        title={`Run ${file.name} (Cmd: ${currentRunnableCommandForTab})`}
+                                        className="p-0.5 rounded hover:bg-green-200 [.dark_&]:hover:bg-green-700 text-green-600 [.dark_&]:text-green-400 flex-shrink-0 mx-1"
                                         aria-label={`Run ${file.name}`}
                                     > <FiPlay size={12} /> </button>
                                 )}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onCloseTab(file.path); }}
                                     title={(isDirty && !tabIsImage) ? "Close (unsaved)" : "Close"}
-                                    className={`p-0.5 rounded flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200 flex-shrink-0 w-[16px] h-[16px] ${isActive ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
+                                    className={`p-0.5 rounded flex items-center justify-center text-neutral-500 [.dark_&]:text-neutral-400 hover:bg-neutral-300 [.dark_&]:hover:bg-neutral-600 hover:text-neutral-700 [.dark_&]:hover:text-neutral-200 flex-shrink-0 w-[16px] h-[16px] ${isActive ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
                                     aria-label={`Close ${file.name}`}
                                 > {(isDirty && !tabIsImage) ? <FiCircle size={10} className="fill-current" /> : <FiX size={14} />} </button>
                             </div>
@@ -454,41 +492,42 @@ const CodeEditor = ({
                     <button
                         onClick={toggleTerminal}
                         title={isTerminalOpen ? "Close Terminal (Cmd+J)" : "Open Terminal (Cmd+J)"}
-                        className={`p-1.5 rounded hover:bg-gray-300 dark:hover:bg-gray-600 ${isTerminalOpen ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+                        className={`p-1.5 rounded hover:bg-neutral-300 [.dark_&]:hover:bg-neutral-600 ${isTerminalOpen ? 'bg-neutral-200 [.dark_&]:bg-neutral-700' : ''}`}
                         aria-label={isTerminalOpen ? "Close Terminal" : "Open Terminal"}
-                    > <FiTerminal size={16} className={isTerminalOpen ? "text-blue-500 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"}/> </button>
+                    > <FiTerminal size={16} className={isTerminalOpen ? "text-blue-500 [.dark_&]:text-blue-400" : "text-neutral-600 [.dark_&]:text-neutral-400"}/> </button>
                 </div>
              </div>
 
-             <div id="editor-panel" role="tabpanel" className="flex-1 relative overflow-hidden bg-gray-50 dark:bg-[#1e1e1e]">
+             <div id="editor-panel" role="tabpanel" className="flex-1 relative overflow-hidden bg-neutral-50 [.dark_&]:bg-[#1e1e1e]">
                  {showLoadingState && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10 backdrop-blur-sm">
-                        <div className="flex flex-col items-center p-4 rounded bg-gray-200/90 dark:bg-gray-700/90 shadow-md">
-                            <FiLoader className="animate-spin text-blue-600 dark:text-blue-400 mb-2" size={24} />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">Loading {activeFileName || 'file'}...</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/50 [.dark_&]:bg-neutral-900/50 z-10 backdrop-blur-sm">
+                        <div className="flex flex-col items-center p-4 rounded bg-neutral-200/90 [.dark_&]:bg-neutral-700/90 shadow-md">
+                            <FiLoader className="animate-spin text-blue-600 [.dark_&]:text-blue-400 mb-2" size={24} />
+                            <span className="text-sm text-neutral-700 [.dark_&]:text-neutral-300">Loading {activeFileName || 'file'}...</span>
                         </div>
                     </div>
                 )}
                  {showErrorState && (
-                    <div className="m-4 p-3 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-600 rounded-md text-red-700 dark:text-red-300 text-sm flex items-start space-x-2 break-words z-10 relative">
+                    <div className="m-4 p-3 bg-red-100 [.dark_&]:bg-red-900/50 border border-red-300 [.dark_&]:border-red-600 rounded-md text-red-700 [.dark_&]:text-red-300 text-sm flex items-start space-x-2 break-words z-10 relative">
                         <FiAlertCircle size={18} className="flex-shrink-0 mt-0.5" />
                         <span>Error loading {activeFileName || 'file'}: {activeFileLoadError}</span>
                     </div>
                 )}
                  {showNoFilesOpen && !showLoadingState && !showErrorState && (
-                    <div className="flex flex-1 flex-col items-center justify-center h-full p-6 text-gray-500 dark:text-gray-400">
-                        <img src="/logo.svg" alt="No file selected" className="w-16 h-16 mb-4 opacity-50" />
+                    <div className="flex flex-1 flex-col items-center justify-center h-full p-6 text-neutral-500 [.dark_&]:text-neutral-400">
+                        <img src="logo.svg" alt="No file selected" className="[.dark_&]:invert w-16 h-16 mb-4 opacity-50" /> {/* Assuming logo.svg is in public */}
                         <p>Select a file from the list on the left to open it.</p>
-                         <p className="text-xs mt-2">(Use <kbd className="px-1 py-0.5 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700">Cmd/Ctrl+S</kbd> to save)</p>
-                         <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700">Cmd/Ctrl+K</kbd> for AI edit)</p>
-                         <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700">Cmd/Ctrl+J</kbd> to toggle Terminal)</p>
+                         <p className="text-xs mt-2">(Use <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">Cmd/Ctrl+S</kbd> to save)</p>
+                         <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">Cmd/Ctrl+K</kbd> for AI edit)</p>
+                         <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">Cmd/Ctrl+J</kbd> to toggle Terminal)</p>
+                         <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">Cmd/Ctrl +</kbd> / <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">-</kbd> to zoom)</p>
                     </div>
                 )}
 
                 {showEditorArea && (
                     activeFileIsImage ? (
-                        <div className="w-full h-full flex items-center justify-center p-2 bg-gray-100 dark:bg-gray-800">
-                            <ImageEditor initialFilePath={activeFilePath} className="max-w-full max-h-full border border-black" />
+                        <div className="w-full h-full flex items-center justify-center p-2 bg-neutral-100 [.dark_&]:bg-neutral-800">
+                            <ImageEditor initialFilePath={activeFilePath} className="max-w-full max-h-full border" /> {/* Removed border-black for theme consistency */}
                         </div>
                     ) : (
                         <Editor
@@ -507,7 +546,7 @@ const CodeEditor = ({
                 )}
             </div>
         
-            <div className={`flex-shrink-0 border-t dark:border-gray-700 ${isTerminalOpen ? 'h-48 md:h-64' : 'h-0 hidden'} transition-all duration-300 ease-in-out overflow-hidden`}>
+            <div className={`flex-shrink-0  ${isTerminalOpen ? 'h-48 md:h-64' : 'h-0 hidden'} transition-all duration-300 ease-in-out overflow-hidden [.dark_&]:bg-[#2e2e2e] bg-neutral-100`}>
                  <TerminalComponent rootDir={rootDir} isVisible={isTerminalOpen} />
             </div>
         </div>
