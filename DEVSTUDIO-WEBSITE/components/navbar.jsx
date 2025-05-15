@@ -90,7 +90,7 @@ const Navbar = () => {
       {/* Right Side: Button + Theme Toggle */}
       <div className="flex items-center space-x-4"> {/* Use flex to align items */}
         <Link
-        href="https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio.Setup.0.1.1.exe"
+        href="https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio-0.2.1.exe"
         className={buttonLinkClasses}
         target="_blank"
         rel="noopener noreferrer"
