@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "../components/theme-provider"
 import Footer from "../../components/footer"
 import Script from "next/script" 
 import Analytics from "./analytics";
