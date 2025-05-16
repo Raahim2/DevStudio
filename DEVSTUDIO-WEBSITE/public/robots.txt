@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://devstudio-ai.vercel.app/sitemap.xml
