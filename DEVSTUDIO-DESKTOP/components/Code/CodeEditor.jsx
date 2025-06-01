@@ -547,7 +547,7 @@ const CodeEditor = ({
             </div>
         
             <div className={`flex-shrink-0  ${isTerminalOpen ? 'h-48 md:h-64' : 'h-0 hidden'} transition-all duration-300 ease-in-out overflow-hidden [.dark_&]:bg-[#2e2e2e] bg-neutral-100`}>
-                 <TerminalComponent rootDir={rootDir} isVisible={isTerminalOpen} />
+                 <TerminalComponent rootDir={rootDir} isVisible={isTerminalOpen} isDarkMode={isDarkMode}/>
             </div>
         </div>
     );

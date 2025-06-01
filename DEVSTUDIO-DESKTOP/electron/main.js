@@ -38,13 +38,15 @@ function createWindow() {
         mainWindow.setMenu(null);
     } else {
         mainWindow.loadURL(CONSTANTS.LOCAL_HOST_URL).catch(err => console.error('[Main Process] Failed to load localhost:', err));
-        const menu = Menu.buildFromTemplate([
-            {
-                label: 'DevStudio',
-                submenu: [{ role: 'reload' }, { role: 'toggleDevTools' }, { role: 'quit' }]
-            }
-        ]);
-        Menu.setApplicationMenu(menu);
+        // const menu = Menu.buildFromTemplate([
+        //     {
+        //         label: 'DevStudio',
+        //         submenu: [{ role: 'reload' }, { role: 'toggleDevTools' }, { role: 'quit' }]
+        //     }
+        // ]);
+        // Menu.setApplicationMenu(menu);
+        mainWindow.setMenu(null);
+
         // mainWindow.webContents.openDevTools(); // Optional: Open dev tools on start
     }
 
