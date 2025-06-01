@@ -5,7 +5,7 @@ import crypto from "crypto";
 
 async function fetchAndDecryptApiKey() {
   try {
-    const res = await fetch("http://localhost:3001/api/token", { method: "POST" });
+    const res = await fetch("https://devstudio-ai.vercel.app/api/token", { method: "POST" });
     if (!res.ok) throw new Error("Failed to fetch token");
     const { encrypted, salt, iv } = await res.json();
 
