@@ -2,24 +2,54 @@
 
 import React, { useEffect, useMemo, useState, useCallback, useRef, memo } from 'react';
 import Editor, { useMonaco } from '@monaco-editor/react';
-import { FiLoader, FiAlertCircle, FiCode, FiX, FiCircle, FiImage, FiTerminal, FiPlay } from 'react-icons/fi';
+import { FiLoader, FiAlertCircle, FiCode, FiX, FiCircle, FiImage, FiTerminal, FiPlay, FiFileText, FiVolume2, FiFilm } from 'react-icons/fi'; // Added new icons
 import { callGeminiForEdit } from '../../hooks/geminiUtils';
 import dynamic from 'next/dynamic';
 import ImageEditor from './ImageEditor';
+// Import new viewers
+import AudioPlayer from './AudioPlayer';
+import VideoPlayer from './VideoPlayer';
+
 
 const TerminalComponent = dynamic(() => import('./Terminal'), {
     ssr: false,
 });
 
-const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg', 'ico', 'avif', 'tiff' , 'pdf' ];
+const PdfViewerComponent = dynamic(() => import('./PdfViewer'), {
+    ssr: false,
+});
+
+const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg', 'ico', 'avif', 'tiff' ];
+const PDF_EXTENSIONS = ['pdf'];
+const AUDIO_EXTENSIONS = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'];
+const VIDEO_EXTENSIONS = ['mp4', 'webm', 'ogv', 'mov', 'avi', 'mkv']; // Note: AVI, MKV might have limited browser/codec support
+
 const isImageFile = (filename) => {
     if (!filename) return false;
     const extension = filename.split('.').pop()?.toLowerCase();
     return IMAGE_EXTENSIONS.includes(extension ?? '');
 };
 
+const isPdfFile = (filename) => {
+    if (!filename) return false;
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return PDF_EXTENSIONS.includes(extension ?? '');
+};
+
+const isAudioFile = (filename) => {
+    if (!filename) return false;
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return AUDIO_EXTENSIONS.includes(extension ?? '');
+};
+
+const isVideoFile = (filename) => {
+    if (!filename) return false;
+    const extension = filename.split('.').pop()?.toLowerCase();
+    return VIDEO_EXTENSIONS.includes(extension ?? '');
+};
+
 const getLanguageForMonaco = (filename) => {
-    if (!filename || isImageFile(filename)) return 'plaintext';
+    if (!filename || isImageFile(filename) || isPdfFile(filename) || isAudioFile(filename) || isVideoFile(filename)) return 'plaintext'; // Treat binary/special files as plaintext for Monaco config
     const extension = filename.split('.').pop()?.toLowerCase();
     switch (extension) {
         case 'js': case 'jsx': return 'javascript';
@@ -49,6 +79,7 @@ const getLanguageForMonaco = (filename) => {
 };
 
 const getRunCommand = (filePath, fileName, rootDir) => {
+    // ... (getRunCommand implementation remains the same)
     if (!fileName || !filePath || !rootDir) return null;
     const extension = fileName.split('.').pop()?.toLowerCase();
     
@@ -86,6 +117,7 @@ const getRunCommand = (filePath, fileName, rootDir) => {
 };
 
 const PromptInput = ({ isOpen, onClose, onSubmit, prompt, setPrompt, isLoading, error, position }) => {
+    // ... (PromptInput implementation remains the same)
     const inputRef = useRef(null);
 
     useEffect(() => {
@@ -183,29 +215,40 @@ const CodeEditor = ({
 
     const activeFile = useMemo(() => openFiles.find(f => f.path === activeFilePath), [openFiles, activeFilePath]);
     const activeFileName = activeFile?.name;
+
     const activeFileIsImage = useMemo(() => isImageFile(activeFileName), [activeFileName]);
+    const activeFileIsPdf = useMemo(() => isPdfFile(activeFileName), [activeFileName]);
+    const activeFileIsAudio = useMemo(() => isAudioFile(activeFileName), [activeFileName]);
+    const activeFileIsVideo = useMemo(() => isVideoFile(activeFileName), [activeFileName]);
+    
+    const activeFileIsSpecialView = useMemo(() => 
+        activeFileIsImage || activeFileIsPdf || activeFileIsAudio || activeFileIsVideo,
+        [activeFileIsImage, activeFileIsPdf, activeFileIsAudio, activeFileIsVideo]
+    );
 
     const editorContent = useMemo(() => {
-        if (activeFilePath && fileStates[activeFilePath] && !activeFileIsImage) {
+        if (activeFilePath && fileStates[activeFilePath] && !activeFileIsSpecialView) {
             return fileStates[activeFilePath].content ?? '';
         }
         return '';
-    }, [activeFilePath, fileStates, activeFileIsImage]);
+    }, [activeFilePath, fileStates, activeFileIsSpecialView]);
 
     const language = useMemo(() => getLanguageForMonaco(activeFileName), [activeFileName]);
 
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isPromptInputOpen, setIsPromptInputOpen] = useState(false);
     const [promptInput, setPromptInput] = useState('');
+    // ... (rest of the state variables like selectedTextForPrompt, etc. remain same)
     const [selectedTextForPrompt, setSelectedTextForPrompt] = useState('');
     const [selectionRange, setSelectionRange] = useState(null);
     const [promptPosition, setPromptPosition] = useState(null);
     const [isGeminiLoading, setIsGeminiLoading] = useState(false);
     const [geminiError, setGeminiError] = useState(null);
-    const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
+    const [isApiKeyMissing, setIsApiKeyMissing] = useState(false); // Keep this if you use it
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const [runnableCommand, setRunnableCommand] = useState(null);
-    const [fontSize, setFontSize] = useState(16); // Initial font size
+    const [fontSize, setFontSize] = useState(16);
+
 
     useEffect(() => {
         if (activeFile && activeFile.path && activeFile.name && rootDir) {
@@ -215,6 +258,7 @@ const CodeEditor = ({
         }
     }, [activeFile, rootDir]);
 
+    // useEffect for API Key (if you still need it, keep it)
     // useEffect(() => {
     //     const key = process.env.NEXT_PUBLIC_GEMINI_API;
     //     setIsApiKeyMissing(!key || key === 'YOUR_GEMINI_API_KEY' || key.trim() === '');
@@ -242,31 +286,31 @@ const CodeEditor = ({
     }, [activeFilePath, openFiles]);
 
     const handleEditorChange = useCallback((value) => {
-        if (latestProps.current.activeFilePath && !isImageFile(activeFile?.name)) {
+        if (latestProps.current.activeFilePath && !activeFileIsSpecialView) { // Check !activeFileIsSpecialView
             latestProps.current.onContentChange(latestProps.current.activeFilePath, value ?? '');
         }
         if (geminiError) setGeminiError(null);
-    }, [activeFile?.name, geminiError]);
+    }, [activeFileIsSpecialView, geminiError]); // Added activeFileIsSpecialView
 
     const editorOptions = useMemo(() => ({
-        readOnly: !activeFilePath || !!isGlobalFileLoading || !!globalLoadError || isGeminiLoading || isPromptInputOpen || activeFileIsImage,
-        minimap: { enabled: !activeFileIsImage },
+        readOnly: !activeFilePath || !!isGlobalFileLoading || !!globalLoadError || isGeminiLoading || isPromptInputOpen || activeFileIsSpecialView, // Updated
+        minimap: { enabled: !activeFileIsSpecialView },
         scrollBeyondLastLine: false, 
-        fontSize: fontSize, // Controlled by React state
+        fontSize: fontSize,
         wordWrap: 'off',
-        lineNumbers: activeFileIsImage ? 'off' : 'on',
+        lineNumbers: activeFileIsSpecialView ? 'off' : 'on',
         automaticLayout: true, tabSize: 4, insertSpaces: true,
-        renderLineHighlight: activeFileIsImage ? 'none' : 'gutter',
+        renderLineHighlight: activeFileIsSpecialView ? 'none' : 'gutter',
         scrollbar: { verticalScrollbarSize: 10, horizontalScrollbarSize: 10 },
-        glyphMargin: !activeFileIsImage, folding: !activeFileIsImage,
-        lineDecorationsWidth: !activeFileIsImage ? 10 : 0,
-        lineNumbersMinChars: !activeFileIsImage ? 5 : 0,
-    }), [activeFilePath, isGlobalFileLoading, globalLoadError, isGeminiLoading, isPromptInputOpen, activeFileIsImage, fontSize]); // Added fontSize to dependency array
+        glyphMargin: !activeFileIsSpecialView, folding: !activeFileIsSpecialView,
+        lineDecorationsWidth: !activeFileIsSpecialView ? 10 : 0,
+        lineNumbersMinChars: !activeFileIsSpecialView ? 5 : 0,
+    }), [activeFilePath, isGlobalFileLoading, globalLoadError, isGeminiLoading, isPromptInputOpen, activeFileIsSpecialView, fontSize]); // Updated
 
     const editorTheme = isDarkMode ? 'vs-dark' : 'vs';
 
     const handleOpenPromptInput = useCallback(() => {
-        if (activeFileIsImage) return;
+        if (activeFileIsSpecialView) return; // Updated
         if (isApiKeyMissing) {
              setGeminiError("Gemini API key is missing. Configure NEXT_PUBLIC_GEMINI_API.");
              setPromptPosition({ top: 20, left: 20 }); 
@@ -278,6 +322,7 @@ const CodeEditor = ({
         if (!selection || selection.isEmpty()) {
             setGeminiError("Please select text to use AI edit."); return;
         }
+        // ... (rest of handleOpenPromptInput logic remains same)
         const selectedText = editor.getModel().getValueInRange(selection);
         setSelectedTextForPrompt(selectedText);
         setSelectionRange(selection);
@@ -301,20 +346,21 @@ const CodeEditor = ({
         if (top < 10) top = 10;
         setPromptPosition({ top, left });
         setIsPromptInputOpen(true);
-    }, [monaco, isApiKeyMissing, activeFileIsImage]);
+    }, [monaco, isApiKeyMissing, activeFileIsSpecialView]); // Updated
 
     const handleClosePromptInput = useCallback(() => {
         setIsPromptInputOpen(false);
         if (!geminiError) setPromptInput('');
         setPromptPosition(null);
-        if (editorRef.current && !geminiError && !activeFileIsImage) {
+        if (editorRef.current && !geminiError && !activeFileIsSpecialView) { // Updated
              setTimeout(() => editorRef.current?.focus(), 0);
         }
-    }, [geminiError, activeFileIsImage]);
+    }, [geminiError, activeFileIsSpecialView]); // Updated
 
     const handlePromptSubmit = useCallback(async () => {
         const currentActiveFilePath = latestProps.current.activeFilePath;
-        if (activeFileIsImage || isApiKeyMissing || !promptInput || !selectionRange || !currentActiveFilePath) return;
+        if (activeFileIsSpecialView || isApiKeyMissing || !promptInput || !selectionRange || !currentActiveFilePath) return; // Updated
+        // ... (rest of handlePromptSubmit logic remains same)
         const editor = editorRef.current;
         if (!editor || !editor.getModel()) { setGeminiError("Editor not ready."); return; }
         setIsGeminiLoading(true); setGeminiError(null);
@@ -333,15 +379,16 @@ const CodeEditor = ({
             setGeminiError(message);
         } finally {
             setIsGeminiLoading(false);
-            if (!geminiError && editorRef.current && !activeFileIsImage) {
+            if (!geminiError && editorRef.current && !activeFileIsSpecialView) { // Updated
                  setTimeout(() => editorRef.current?.focus(), 0);
             }
         }
-     }, [promptInput, selectionRange, language, isApiKeyMissing, handleClosePromptInput, activeFileIsImage, geminiError]);
+     }, [promptInput, selectionRange, language, isApiKeyMissing, handleClosePromptInput, activeFileIsSpecialView, geminiError]); // Updated
 
     const toggleTerminal = useCallback(() => { setIsTerminalOpen(prev => !prev); }, []);
 
     const handleRunFile = useCallback(() => {
+        // ... (handleRunFile logic remains same)
         if (!runnableCommand || !rootDir) {
             console.warn("Cannot run: No runnable command or rootDir."); return;
         }
@@ -359,7 +406,9 @@ const CodeEditor = ({
         editorRef.current = editor;
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyS, () => {
             const currentOpenFile = latestProps.current.activeFilePath ? openFiles.find(f => f.path === latestProps.current.activeFilePath) : null;
-            if (currentOpenFile && isImageFile(currentOpenFile.name)) return;
+            const currentIsSpecial = currentOpenFile && (isImageFile(currentOpenFile.name) || isPdfFile(currentOpenFile.name) || isAudioFile(currentOpenFile.name) || isVideoFile(currentOpenFile.name));
+            if (currentIsSpecial) return; // Don't save for special viewers via Ctrl+S here
+
             const currentContent = editorRef.current?.getModel()?.getValue();
             const path = latestProps.current.activeFilePath;
             const saveHandler = latestProps.current.onSaveFile;
@@ -369,52 +418,51 @@ const CodeEditor = ({
         });
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyK, () => {
             const currentOpenFile = latestProps.current.activeFilePath ? openFiles.find(f => f.path === latestProps.current.activeFilePath) : null;
-            if (currentOpenFile && !isImageFile(currentOpenFile.name)) {
+            const currentIsSpecial = currentOpenFile && (isImageFile(currentOpenFile.name) || isPdfFile(currentOpenFile.name) || isAudioFile(currentOpenFile.name) || isVideoFile(currentOpenFile.name));
+            if (currentOpenFile && !currentIsSpecial) {
                  handleOpenPromptInput();
              }
         });
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyJ, toggleTerminal);
         
-        // Add font size increase command (Ctrl/Cmd + =)
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Equal, () => {
             const currentEditor = editorRef.current;
-            if (currentEditor && monacoInstance) { // Ensure monacoInstance is available
+            if (currentEditor) {
                 const currentSize = currentEditor.getOption(monacoInstance.editor.EditorOption.fontSize);
-                const newSize = Math.min(currentSize + 1, 40); // Max font size 40
+                const newSize = Math.min(currentSize + 1, 40);
                 if (newSize !== currentSize) {
                     currentEditor.updateOptions({ fontSize: newSize });
-                    setFontSize(newSize); // Sync React state
+                    setFontSize(newSize);
                 }
             }
         });
 
-        // Add font size decrease command (Ctrl/Cmd -)
         editor.addCommand(monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.Minus, () => {
             const currentEditor = editorRef.current;
-            if (currentEditor && monacoInstance) { // Ensure monacoInstance is available
+            if (currentEditor) {
                 const currentSize = currentEditor.getOption(monacoInstance.editor.EditorOption.fontSize);
-                const newSize = Math.max(currentSize - 1, 6); // Min font size 6
+                const newSize = Math.max(currentSize - 1, 6);
                 if (newSize !== currentSize) {
                     currentEditor.updateOptions({ fontSize: newSize });
-                    setFontSize(newSize); // Sync React state
+                    setFontSize(newSize);
                 }
             }
         });
+        
+        const activeFileFromProps = latestProps.current.activeFilePath ? openFiles.find(f => f.path === latestProps.current.activeFilePath) : null;
+        const currentActiveFileIsSpecialView = activeFileFromProps ? (
+            isImageFile(activeFileFromProps.name) || 
+            isPdfFile(activeFileFromProps.name) || 
+            isAudioFile(activeFileFromProps.name) || 
+            isVideoFile(activeFileFromProps.name)
+        ) : false;
 
-        // Initial focus logic
-        const currentActiveFileIsImage = isImageFile(latestProps.current.activeFilePath ? openFiles.find(f => f.path === latestProps.current.activeFilePath)?.name : null);
-        if (!isGlobalFileLoading && !globalLoadError && latestProps.current.activeFilePath && !currentActiveFileIsImage) {
+        if (!isGlobalFileLoading && !globalLoadError && latestProps.current.activeFilePath && !currentActiveFileIsSpecialView) {
              editor.focus();
         }
     }, [
-        handleOpenPromptInput, 
-        toggleTerminal, 
-        isGlobalFileLoading, 
-        globalLoadError, 
-        openFiles, // For currentActiveFileIsImage logic
-        // latestProps is a ref, its contents are accessed via .current so not needed in deps for value stability
-        // setFontSize is stable from useState, not needed in deps
-        // monacoInstance (from useMonaco or onMount) is also typically stable or available in scope
+        handleOpenPromptInput, toggleTerminal, isGlobalFileLoading, 
+        globalLoadError, openFiles, // setFontSize is stable
     ]);
 
 
@@ -427,14 +475,21 @@ const CodeEditor = ({
     const showLoadingState = isActiveFileLoading && activeFilePath;
     const showErrorState = !!activeFileLoadError && activeFilePath && !isActiveFileLoading;
 
-    // Effect for focusing editor when active file changes and is editable
     useEffect(() => {
-        if (showEditorArea && !activeFileIsImage && !isPromptInputOpen && editorRef.current) {
-            // A small delay can sometimes help if focus is lost immediately after content update
+        if (showEditorArea && !activeFileIsSpecialView && !isPromptInputOpen && editorRef.current) {
             setTimeout(() => editorRef.current?.focus(), 0);
         }
-    }, [showEditorArea, activeFileIsImage, isPromptInputOpen, editorContent]);
+    }, [showEditorArea, activeFileIsSpecialView, isPromptInputOpen, editorContent]); // Updated dependency
 
+    const getTabIcon = (fileName, isLoading, error) => {
+        if (isLoading) return <FiLoader className="animate-spin mr-1.5 flex-shrink-0" size={14} />;
+        if (error) return <FiAlertCircle className="mr-1.5 flex-shrink-0 text-red-500" size={14} />;
+        if (isImageFile(fileName)) return <FiImage className="mr-1.5 flex-shrink-0" size={14} />;
+        if (isPdfFile(fileName)) return <FiFileText className="mr-1.5 flex-shrink-0" size={14} />;
+        if (isAudioFile(fileName)) return <FiVolume2 className="mr-1.5 flex-shrink-0" size={14} />;
+        if (isVideoFile(fileName)) return <FiFilm className="mr-1.5 flex-shrink-0" size={14} />;
+        return <FiCode className="mr-1.5 flex-shrink-0" size={14} />;
+    };
 
     return (
         <div className="flex flex-1 flex-col bg-white [.dark_&]:bg-neutral-900 overflow-hidden">
@@ -446,18 +501,17 @@ const CodeEditor = ({
                     {openFiles.map(file => {
                         const isActive = file.path === activeFilePath;
                         const state = fileStates[file.path] || {};
+                        const isFileSpecialView = isImageFile(file.name) || isPdfFile(file.name) || isAudioFile(file.name) || isVideoFile(file.name);
                         const isDirty = state.isDirty ?? false;
                         const fileLoadError = state.error ?? null;
                         const isLoadingThisTab = state.isLoading ?? false;
-                        const tabIsImage = isImageFile(file.name);
                         const currentRunnableCommandForTab = getRunCommand(file.path, file.name, rootDir);
-
 
                         return (
                             <div
                                 key={file.path} data-path={file.path}
                                 onClick={() => onTabSelect(file.path)}
-                                title={`${file.path}${isDirty && !tabIsImage ? ' (unsaved)' : ''}${fileLoadError ? ` (Error: ${fileLoadError})`: ''}`}
+                                title={`${file.path}${isDirty && !isFileSpecialView ? ' (unsaved)' : ''}${fileLoadError ? ` (Error: ${fileLoadError})`: ''}`}
                                 className={`flex items-center justify-between h-full px-3 py-1 border-r border-neutral-200 [.dark_&]:border-neutral-700 cursor-pointer text-sm whitespace-nowrap group ${
                                     isActive
                                     ? 'bg-white [.dark_&]:bg-neutral-900 text-blue-600 [.dark_&]:text-blue-400 border-t-2 border-t-blue-500 relative top-[-1px]'
@@ -465,12 +519,9 @@ const CodeEditor = ({
                                 } ${fileLoadError ? 'text-red-600 [.dark_&]:text-red-400' : ''}`}
                                 role="tab" aria-selected={isActive} aria-controls="editor-panel"
                             >
-                                {isLoadingThisTab ? ( <FiLoader className="animate-spin mr-1.5 flex-shrink-0" size={14} /> )
-                                 : fileLoadError ? ( <FiAlertCircle className="mr-1.5 flex-shrink-0 text-red-500" size={14} /> )
-                                 : tabIsImage ? ( <FiImage className="mr-1.5 flex-shrink-0" size={14} /> )
-                                 : ( <FiCode className="mr-1.5 flex-shrink-0" size={14} /> )}
+                                {getTabIcon(file.name, isLoadingThisTab, fileLoadError)}
                                 <span className="truncate max-w-[150px] mr-1">{file.name}</span>
-                                {isActive && currentRunnableCommandForTab && ( // Use currentRunnableCommandForTab for the play button logic
+                                {isActive && currentRunnableCommandForTab && (
                                     <button
                                         onClick={(e) => { e.stopPropagation(); handleRunFile(); }}
                                         title={`Run ${file.name} (Cmd: ${currentRunnableCommandForTab})`}
@@ -480,10 +531,10 @@ const CodeEditor = ({
                                 )}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onCloseTab(file.path); }}
-                                    title={(isDirty && !tabIsImage) ? "Close (unsaved)" : "Close"}
+                                    title={(isDirty && !isFileSpecialView) ? "Close (unsaved)" : "Close"}
                                     className={`p-0.5 rounded flex items-center justify-center text-neutral-500 [.dark_&]:text-neutral-400 hover:bg-neutral-300 [.dark_&]:hover:bg-neutral-600 hover:text-neutral-700 [.dark_&]:hover:text-neutral-200 flex-shrink-0 w-[16px] h-[16px] ${isActive ? '' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}
                                     aria-label={`Close ${file.name}`}
-                                > {(isDirty && !tabIsImage) ? <FiCircle size={10} className="fill-current" /> : <FiX size={14} />} </button>
+                                > {(isDirty && !isFileSpecialView) ? <FiCircle size={10} className="fill-current" /> : <FiX size={14} />} </button>
                             </div>
                         );
                     })}
@@ -515,7 +566,7 @@ const CodeEditor = ({
                 )}
                  {showNoFilesOpen && !showLoadingState && !showErrorState && (
                     <div className="flex flex-1 flex-col items-center justify-center h-full p-6 text-neutral-500 [.dark_&]:text-neutral-400">
-                        <img src="logo.svg" alt="No file selected" className="[.dark_&]:invert w-16 h-16 mb-4 opacity-50" /> {/* Assuming logo.svg is in public */}
+                        <img src="logo.svg" alt="No file selected" className="[.dark_&]:invert w-16 h-16 mb-4 opacity-50" />
                         <p>Select a file from the list on the left to open it.</p>
                          <p className="text-xs mt-2">(Use <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">Cmd/Ctrl+S</kbd> to save)</p>
                          <p className="text-xs mt-1">(Use <kbd className="px-1 py-0.5 border [.dark_&]:border-neutral-600 rounded bg-neutral-100 [.dark_&]:bg-neutral-700">Cmd/Ctrl+K</kbd> for AI edit)</p>
@@ -526,9 +577,13 @@ const CodeEditor = ({
 
                 {showEditorArea && (
                     activeFileIsImage ? (
-                        <div className="w-full h-full flex items-center justify-center p-2 bg-neutral-100 [.dark_&]:bg-neutral-800">
-                            <ImageEditor initialFilePath={activeFilePath} className="max-w-full max-h-full border" /> {/* Removed border-black for theme consistency */}
-                        </div>
+                        <ImageEditor initialFilePath={activeFilePath} className="max-w-full max-h-full" />
+                    ) : activeFileIsPdf ? (
+                        <PdfViewerComponent filePath={activeFilePath} className="w-full h-full" />
+                    ) : activeFileIsAudio ? (
+                        <AudioPlayer filePath={activeFilePath} className="w-full h-full" />
+                    ) : activeFileIsVideo ? (
+                        <VideoPlayer filePath={activeFilePath} className="w-full h-full" />
                     ) : (
                         <Editor
                             height="100%" language={language} theme={editorTheme} value={editorContent}
@@ -537,7 +592,7 @@ const CodeEditor = ({
                         />
                     )
                 )}
-                {!activeFileIsImage && (
+                {!activeFileIsSpecialView && ( // Show prompt only for editable text files
                     <PromptInput
                         isOpen={isPromptInputOpen} onClose={handleClosePromptInput} onSubmit={handlePromptSubmit}
                         prompt={promptInput} setPrompt={setPromptInput} isLoading={isGeminiLoading}
