@@ -2,12 +2,35 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import crypto from "crypto";
 
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API; // Ensure this is configured
 
+async function fetchAndDecryptApiKey() {
+  try {
+    const res = await fetch("http://localhost:3001/api/token", { method: "POST" });
+    if (!res.ok) throw new Error("Failed to fetch token");
+    const { encrypted, salt, iv } = await res.json();
+
+    const key = Buffer.from(salt, "hex");
+    const ivBuffer = Buffer.from(iv, "hex");
+
+    const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer);
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+
+    return decrypted; 
+  } catch (e) {
+    console.error("Failed to fetch/decrypt token:", e);
+    return null;
+  }
+}
+
+const API_KEY =  await fetchAndDecryptApiKey();
 
 export const useGeminiChat = () => {
     const [chatHistory, setChatHistory] = useState([]);
+    
+
     const [isSending, setIsSending] = useState(false);
     const [error, setError] = useState(null);
     const [isApiKeyMissing, setIsApiKeyMissing] = useState(!API_KEY);

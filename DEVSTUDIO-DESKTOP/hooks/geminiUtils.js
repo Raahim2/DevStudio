@@ -1,6 +1,28 @@
 // src/lib/geminiUtils.js (or similar location)
 
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API;
+import crypto from "crypto";
+
+
+async function fetchAndDecryptApiKey() {
+  try {
+    const res = await fetch("http://localhost:3001/api/token", { method: "POST" });
+    if (!res.ok) throw new Error("Failed to fetch token");
+    const { encrypted, salt, iv } = await res.json();
+
+    const key = Buffer.from(salt, "hex");
+    const ivBuffer = Buffer.from(iv, "hex");
+
+    const decipher = crypto.createDecipheriv("aes-256-cbc", key, ivBuffer);
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted; 
+  } catch (e) {
+    console.error("Failed to fetch/decrypt token:", e);
+    return null;
+  }
+}
+
+const API_KEY = await fetchAndDecryptApiKey();
 const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest';
 const API_GENERATE_CONTENT_URL = `${API_ENDPOINT_BASE}:generateContent`; // Non-streaming endpoint
 
@@ -13,15 +35,15 @@ const safetySettings = [
 ];
 
 const generationConfig = {
+    candidateCount: 1,
     // temperature: 0.7, // Example: Adjust creativity (0-1)
     // topP: 0.9,        // Example: Nucleus sampling
     // topK: 40,         // Example: Top-k sampling
-    candidateCount: 1,
     // maxOutputTokens: 8192, // Model default is usually high enough
     // stopSequences: [],   // If needed
 };
 
-export const callGeminiForEdit = async (selectedCode, userPrompt, language) => {
+export const callGeminiForEdit = async (selectedCode, userPrompt, language ) => {
     if (!API_KEY || API_KEY === 'YOUR_GEMINI_API_KEY' || API_KEY.trim() === '') {
         throw new Error("Gemini API key not configured. Set NEXT_PUBLIC_GEMINI_API.");
     }

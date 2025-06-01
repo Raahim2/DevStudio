@@ -215,10 +215,10 @@ const CodeEditor = ({
         }
     }, [activeFile, rootDir]);
 
-    useEffect(() => {
-        const key = process.env.NEXT_PUBLIC_GEMINI_API;
-        setIsApiKeyMissing(!key || key === 'YOUR_GEMINI_API_KEY' || key.trim() === '');
-    }, []);
+    // useEffect(() => {
+    //     const key = process.env.NEXT_PUBLIC_GEMINI_API;
+    //     setIsApiKeyMissing(!key || key === 'YOUR_GEMINI_API_KEY' || key.trim() === '');
+    // }, []);
 
     useEffect(() => {
         const checkDarkMode = () => setIsDarkMode(document.documentElement.classList.contains('dark'));

@@ -131,8 +131,6 @@ export default function Home() {
         };
     }, [clearAuthState]);
 
-    
-
 
     const flattenDirectoryTree = useCallback((node) => {
         const flatList = [];
