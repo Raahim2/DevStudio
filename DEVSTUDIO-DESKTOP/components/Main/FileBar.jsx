@@ -123,9 +123,7 @@ const DirectoryItem = React.memo(({
     };
 
     const handleDelete = useCallback(async () => {
-        if (window.confirm(`Are you sure you want to delete "${item.name}"? This cannot be undone.`)) {
-            await performDelete(item.path);
-        }
+        await performDelete(item.path);
     }, [item.name, item.path, performDelete]);
 
     const closeContextMenu = () => setContextMenu(null);
@@ -288,12 +286,12 @@ const DirectoryItem = React.memo(({
                 >
                     {item.type === 'directory' && (
                         <>
-                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'file', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center"><FiPlus className="mr-2" /> New File</button>
-                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'directory', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center"><FiFolderPlus className="mr-2" /> New Folder</button>
+                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'file', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center [.dark_&]:text-white"><FiPlus className="mr-2 [.dark_&]:text-white" /> New File</button>
+                            <button onClick={() => { setRenamingItem(null); setCreatingItem({ parentPath: item.path, type: 'directory', name: '' }); setIsOpen(true); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center [.dark_&]:text-white"><FiFolderPlus className="mr-2 [.dark_&]:text-white" /> New Folder</button>
                         </>
                     )}
-                    <button onClick={() => { setCreatingItem(null); setRenamingItem({ path: item.path, name: item.name }); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center"><FiEdit2 className="mr-2" /> Rename</button>
-                    <button onClick={() => { handleDelete(); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-red-100 [.dark_&]:hover:bg-red-700/50 text-red-600 [.dark_&]:text-red-400 flex items-center"><FiTrash2 className="mr-2" /> Delete</button>
+                    <button onClick={() => { setCreatingItem(null); setRenamingItem({ path: item.path, name: item.name }); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-neutral-100 [.dark_&]:hover:bg-neutral-800 flex items-center [.dark_&]:text-white"><FiEdit2 className="mr-2 [.dark_&]:text-white" /> Rename</button>
+                    <button onClick={() => { handleDelete(); closeContextMenu(); }} className="w-full text-left px-3 py-1.5 hover:bg-red-100 [.dark_&]:hover:bg-red-700/50 text-red-600 [.dark_&]:text-red-400 flex items-center "><FiTrash2 className="mr-2" /> Delete</button>
                 </div>
             )}
         </div>
@@ -313,6 +311,7 @@ const FileBar = ({ directoryTree, selectedFolderPath, onRefreshNeeded, onError, 
     const topLevelInputRef = React.useRef(null);
 
 
+
     useEffect(() => {
         const getSep = async () => {
             if (window.electronAPI && window.electronAPI.pathSep) {
@@ -324,6 +323,13 @@ const FileBar = ({ directoryTree, selectedFolderPath, onRefreshNeeded, onError, 
         };
         getSep();
     }, []);
+
+    useEffect(() => {
+    console.log('[FileBar] isOperating changed to:', isOperating);
+    if (isOperating) {
+        console.trace('[FileBar] isOperating set to true');
+    }
+}, [isOperating]);
 
     const performOperation = useCallback(async (operationFn, successMsg, errorMsgPrefix) => {
         if (isOperating) return;
