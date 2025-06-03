@@ -7,10 +7,10 @@ import Topbar from '../../components/Main/Topbar';
 import ChatSection from '../../components/Chat/ChatSection';
 import Bottombar from '../../components/Main/Bottombar';
 import HomeTabContent from '../../components/Main/HomeTabContent';
-import CodeEditor from '../../components/Code/CodeEditor';
+import CodeEditor from '../../components/Code/CodeEditor'; // Ensure this path is correct
 import AutomationTab from '../../components/Automate/Automation';
-import CommitTab from '../../components/Commit/CommitTab';
-import { FiX, FiLoader } from 'react-icons/fi'; // Added FiLoader for example
+import CommitTab from '../../components/Commit/CommitTab'
+import { FiX } from 'react-icons/fi';
 import { useGeminiChat } from '../../hooks/useGeminiChat';
 
 const GITHUB_ACCESS_TOKEN_KEY = 'github_access_token';
@@ -19,8 +19,8 @@ const callElectronApi = async (funcName, ...args) => {
     if (window.electronAPI && typeof window.electronAPI[funcName] === 'function') {
         try {
             if (['startWatchingFolder', 'stopWatchingFolder'].includes(funcName)) {
-                 window.electronAPI[funcName](...args); // These might not return a promise or be awaited
-                 return;
+                 window.electronAPI[funcName](...args);
+                 return; 
             }
             return await window.electronAPI[funcName](...args);
         } catch (error) {
@@ -33,8 +33,9 @@ const callElectronApi = async (funcName, ...args) => {
     }
 };
 
+
+
 const escapeRegex = (string) => {
-    if (typeof string !== 'string') return '';
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
@@ -42,23 +43,19 @@ export default function Home() {
     const [activeTab, setActiveTab] = useState('Code');
     const [selectedFolderPath, setSelectedFolderPath] = useState(null);
     const [directoryTree, setDirectoryTree] = useState(null);
-    const [isLoadingStructure, setIsLoadingStructure] = useState(false);
-    const [error, setError] = useState(null);
+    const [isLoadingStructure, setIsLoadingStructure] = useState(false); // Global loading for file tree
+    const [error, setError] = useState(null); // General errors
     const [openFiles, setOpenFiles] = useState([]);
     const [activeFilePath, setActiveFilePath] = useState(null);
     const [fileStates, setFileStates] = useState({});
-    const [globalFileLoadingError, setGlobalFileLoadingError] = useState(null);
+    const [globalFileLoadingError, setGlobalFileLoadingError] = useState(null); 
     const [accessToken, setAccessToken] = useState(null);
 
     const {
-        chatHistory,
-        sendMessage: sendChatMessageHook, // Expects (promptForAI, userDisplayMessageForHistory)
-        isSending: isChatSending,
-        error: geminiChatError,
-        clearError: clearGeminiChatError,
-        isApiKeyMissing: isGeminiApiKeyMissing,
-        stopGenerating: stopChatGenerating,
-    } = useGeminiChat(); // Assuming your hook handles user message display internally based on second arg
+        chatHistory, sendMessage: sendChatMessageHook, isSending: isChatSending,
+        error: geminiChatError, clearError: clearGeminiChatError,
+        isApiKeyMissing: isGeminiApiKeyMissing, stopGenerating: stopChatGenerating,
+    } = useGeminiChat();
 
     const [chatInputMessage, setChatInputMessage] = useState('');
     const [chatMentionedFiles, setChatMentionedFiles] = useState([]);
@@ -77,7 +74,7 @@ export default function Home() {
           console.error("Failed to remove token from localStorage:", e);
         }
         setAccessToken(null);
-        // if (errorMsg) setError(errorMsg); // You might want to set an error
+       
     }, []);
 
     const handleGithubLogin = useCallback(() => {
@@ -99,6 +96,7 @@ export default function Home() {
           initialToken = localStorage.getItem(GITHUB_ACCESS_TOKEN_KEY);
           if (initialToken) {
             setAccessToken(initialToken);
+          } else {
           }
         } catch (e) {
           console.error("Failed to access localStorage on mount:", e);
@@ -122,6 +120,7 @@ export default function Home() {
           unsubscribe = window.electronAPI.onGithubToken(handleToken);
         } else {
           console.warn('Page: Electron API or onGithubToken function not found. Persistence/Login might not work correctly.');
+         
         }
 
         return () => {
@@ -139,7 +138,7 @@ export default function Home() {
             if (!currentNode) return;
             if (currentNode.type === 'file' && currentNode.path) {
                 const name = currentNode.name || currentNode.path.split(/[\\/]/).pop();
-                flatList.push({ name: name, path: currentNode.path, type: 'file' }); // Ensure type is included
+                flatList.push({ name: name, path: currentNode.path });
             }
             if (currentNode.children && Array.isArray(currentNode.children)) {
                 currentNode.children.forEach(child => traverse(child));
@@ -156,7 +155,6 @@ export default function Home() {
             return;
         }
         try {
-            // Using getFolderStructure and flatten for consistency, or listProjectFiles if it's more direct
             const structure = await callElectronApi('getFolderStructure', folderPath);
             if (structure) {
                 const flatFiles = flattenDirectoryTree(structure);
@@ -182,7 +180,6 @@ export default function Home() {
         setChatMentionedFiles([]);
     }, []);
 
-    // CORRECTED CHAT SEND MESSAGE HANDLER
     const handleChatSendMessage = useCallback(async (messageTypedByUser, filesAttachedByChatSection) => {
         const trimmedMessage = messageTypedByUser.trim();
 
@@ -238,11 +235,11 @@ export default function Home() {
              setOpenFiles([]);
              setActiveFilePath(null);
              setFileStates({});
-             setChatMentionedFiles([]); // Clear chat mentions when folder changes
+             setChatMentionedFiles([]);
          }
 
-         setGlobalFileLoadingError(null);
-         setIsLoadingStructure(true);
+         setGlobalFileLoadingError(null); // Clear global file error on new fetch
+         setIsLoadingStructure(true); // Set loading for directory structure
 
          try {
              const structure = await callElectronApi('getFolderStructure', folderPath);
@@ -269,31 +266,27 @@ export default function Home() {
                     }
                     return newFileStates;
                 });
-                // Also refresh chat project files on external refresh
-                fetchChatProjectFiles(folderPath);
-
             } else if (!isExternalRefresh) {
+                // If it's a fresh load (not external refresh), ensure files are cleared if structure is null
                 if (!structure) {
                     setOpenFiles([]);
                     setActiveFilePath(null);
                     setFileStates({});
                 }
-                // Fetch for chat files on initial, non-external load
-                fetchChatProjectFiles(folderPath);
             }
 
              if (!structure) {
                  let folderName = folderPath; try { folderName = await callElectronApi('pathBasename', folderPath); } catch(e) {/* ignore */}
                  setError(`Could not load structure for "${folderName}". Check permissions or path.`);
              } else {
-                setError(null);
+                setError(null); // Clear general error if structure loaded
+                if (!isExternalRefresh) fetchChatProjectFiles(folderPath); // Fetch for chat on initial load
              }
          } catch (err) {
              setError(`Failed to load folder structure: ${err.message || 'Unknown error'}`);
              setDirectoryTree(null);
-             setChatAllProjectFiles([]); // Clear chat files if structure fails
          } finally { setIsLoadingStructure(false); }
-    }, [activeFilePath, flattenDirectoryTree, fetchChatProjectFiles]); // Added fetchChatProjectFiles
+    }, [activeFilePath, fetchChatProjectFiles, flattenDirectoryTree]);
 
 
     useEffect(() => {
@@ -301,8 +294,7 @@ export default function Home() {
         if (selectedFolderPath && window.electronAPI?.startWatchingFolder && window.electronAPI?.onFileSystemChange) {
             callElectronApi('startWatchingFolder', selectedFolderPath);
             cleanupFileSystemListener = window.electronAPI.onFileSystemChange((changeDetails) => {
-                // Ensure changeDetails and watchedFolderPath are defined before comparing
-                if (changeDetails && typeof changeDetails.watchedFolderPath === 'string' && changeDetails.watchedFolderPath === selectedFolderPath) {
+                if (changeDetails && changeDetails.watchedFolderPath === selectedFolderPath) {
                     if (refreshDebounceTimeoutRef.current) clearTimeout(refreshDebounceTimeoutRef.current);
                     refreshDebounceTimeoutRef.current = setTimeout(() => {
                         fetchDirectoryStructure(selectedFolderPath, true);
@@ -312,7 +304,7 @@ export default function Home() {
         }
         return () => {
             if (selectedFolderPath && window.electronAPI?.stopWatchingFolder) {
-                callElectronApi('stopWatchingFolder', selectedFolderPath); // Pass folder path to stop
+                callElectronApi('stopWatchingFolder');
             }
             if (typeof cleanupFileSystemListener === 'function') cleanupFileSystemListener();
             if (refreshDebounceTimeoutRef.current) clearTimeout(refreshDebounceTimeoutRef.current);
@@ -322,9 +314,9 @@ export default function Home() {
     const fetchFileContent = useCallback(async (filePath, fileName) => {
         setFileStates(prev => ({
             ...prev,
-            [filePath]: { ...prev[filePath], isLoading: true, error: null, name: fileName, content: prev[filePath]?.content ?? '' }
+            [filePath]: { ...prev[filePath], isLoading: true, error: null, name: fileName, content: prev[filePath]?.content ?? '' } // Preserve old content while loading
         }));
-        setGlobalFileLoadingError(null);
+        setGlobalFileLoadingError(null); // Clear global file error for this specific attempt
 
         try {
             const content = await callElectronApi('readFileContent', filePath);
@@ -342,44 +334,44 @@ export default function Home() {
                 ...prev,
                 [filePath]: {
                     ...prev[filePath],
-                    content: null, cleanContent: null,
+                    content: null, cleanContent: null, // Or keep old content if preferred on error
                     isDirty: false, isLoading: false, error: errorMsg,
                 }
             }));
-            setGlobalFileLoadingError(errorMsg);
+            setGlobalFileLoadingError(errorMsg); // Set global error if this specific file fails
         }
     }, []);
 
     const handleFileSelect = useCallback(async (file) => {
         if (!file || !file.path) return;
-        setError(null);
+        setError(null); // Clear general error
+        // Global file loading error is handled by fetchFileContent
 
         let ensuredFileName = file.name;
-        if (!ensuredFileName && window.electronAPI?.pathBasename) {
+        if (!ensuredFileName) {
             try { ensuredFileName = await callElectronApi('pathBasename', file.path); }
             catch (e) { ensuredFileName = file.path.split(/[\\/]/).pop(); }
-        } else if (!ensuredFileName) {
-             ensuredFileName = file.path.split(/[\\/]/).pop();
         }
-
         const fileWithEnsuredName = {...file, name: ensuredFileName};
 
         const existingFile = openFiles.find(f => f.path === fileWithEnsuredName.path);
         if (!existingFile) {
             setOpenFiles(prev => [...prev, fileWithEnsuredName]);
+            // Initial state for new file, content will be fetched
             setFileStates(prev => ({
                 ...prev,
                 [fileWithEnsuredName.path]: { content: '', cleanContent: '', isDirty: false, isLoading: true, error: null, name: fileWithEnsuredName.name }
             }));
             fetchFileContent(fileWithEnsuredName.path, fileWithEnsuredName.name);
         } else {
+            // If file already open, check if it had an error, if so, retry loading
             const currentState = fileStates[fileWithEnsuredName.path];
             if (currentState?.error && !currentState.isLoading) {
                  fetchFileContent(fileWithEnsuredName.path, fileWithEnsuredName.name);
             }
         }
         setActiveFilePath(fileWithEnsuredName.path);
-    }, [openFiles, fetchFileContent, fileStates]);
+    }, [openFiles, fetchFileContent, fileStates]); // Added fileStates
 
      const handleTabSelect = useCallback((filePath) => {
         setActiveFilePath(filePath);
@@ -392,7 +384,7 @@ export default function Home() {
                 const currentIndexInOldList = prevOpenFiles.findIndex(f => f.path === filePathToClose);
                 let nextActivePath = null;
                 if (newOpenFiles.length > 0) {
-                    const nextIndex = Math.max(0, currentIndexInOldList -1);
+                    const nextIndex = Math.max(0, currentIndexInOldList -1); // Try to select previous tab
                     nextActivePath = newOpenFiles[nextIndex]?.path ?? newOpenFiles[0]?.path ?? null;
                 }
                 setActiveFilePath(nextActivePath);
@@ -404,27 +396,29 @@ export default function Home() {
             const newState = { ...prev };
             const closedFileState = newState[filePathToClose];
             delete newState[filePathToClose];
+            // If the closed tab's error was the global error, clear global error
             if (closedFileState?.error && closedFileState.error === globalFileLoadingError) {
                 setGlobalFileLoadingError(null);
             }
             return newState;
         });
-    }, [activeFilePath, globalFileLoadingError]);
+    }, [activeFilePath, globalFileLoadingError]); // Removed fileStates as prev is used. Removed openFiles, prevOpenFiles used.
 
      const handleContentChange = useCallback((filePath, newContent) => {
         setFileStates(prev => {
             const currentState = prev[filePath];
-            if (!currentState) return prev;
+            if (!currentState) return prev; // Should not happen if file is open
             return {
                 ...prev,
                 [filePath]: { ...currentState, content: newContent, isDirty: newContent !== currentState.cleanContent }
             };
         });
+         // If change clears an error state that was global
          const currentFileState = fileStates[filePath];
          if (currentFileState?.error && currentFileState.error === globalFileLoadingError) {
              setGlobalFileLoadingError(null);
          }
-     }, [globalFileLoadingError, fileStates]);
+     }, [globalFileLoadingError, fileStates]); // fileStates needed to check current error
 
     const handleSaveFile = useCallback(async (filePathToSave, currentContent) => {
         const state = fileStates[filePathToSave];
@@ -433,6 +427,7 @@ export default function Home() {
         if (contentToSave === undefined || contentToSave === null) return;
         if (!state || (contentToSave === state.cleanContent && !state.isDirty) || state.isLoading) return;
 
+        // Clear relevant errors before saving
         setError(null);
         if (state.error === globalFileLoadingError) setGlobalFileLoadingError(null);
 
@@ -442,7 +437,7 @@ export default function Home() {
                 ...prev,
                 [filePathToSave]: {
                     ...prev[filePathToSave],
-                    content: contentToSave,
+                    content: contentToSave, // Ensure live content is also updated
                     cleanContent: contentToSave, isDirty: false, error: null,
                 }
             }));
@@ -450,56 +445,36 @@ export default function Home() {
             const errorMsg = `Failed to save ${state.name || 'file'}: ${err.message || 'Unknown error'}`;
             setFileStates(prev => ({
                 ...prev,
-                [filePathToSave]: { ...prev[filePathToSave], error: errorMsg, isDirty: true }
+                [filePathToSave]: { ...prev[filePathToSave], error: errorMsg, isDirty: true } // Remain dirty on save error
             }));
-             setGlobalFileLoadingError(errorMsg);
+             setGlobalFileLoadingError(errorMsg); // Set global error on save failure
         }
-    }, [fileStates, globalFileLoadingError]);
+    }, [fileStates, globalFileLoadingError]); // Added globalFileLoadingError
 
     const handleFolderSelect = async () => {
          setError(null);
          setGlobalFileLoadingError(null);
          setDirectoryTree(null);
+         // Other state resets (openFiles, activeFilePath, fileStates) are handled by fetchDirectoryStructure(..., false)
 
          if (selectedFolderPath && window.electronAPI?.stopWatchingFolder) {
-            await callElectronApi('stopWatchingFolder', selectedFolderPath); // Pass path to stop
+            await callElectronApi('stopWatchingFolder');
          }
+         // setSelectedFolderPath(null); // This will trigger useEffect cleanup for watcher
 
          try {
              const folderPath = await callElectronApi('selectFolder');
              if (folderPath) {
-                 setSelectedFolderPath(folderPath); // Triggers watcher & fetchDirectoryStructure(folderPath, false)
-                 // fetchDirectoryStructure is now called inside useEffect for selectedFolderPath or directly if needed
+                 setSelectedFolderPath(folderPath); // This triggers watcher setup & initial fetch
+                 fetchDirectoryStructure(folderPath, false); 
              } else {
-                 setSelectedFolderPath(null);
-                 setDirectoryTree(null); // Ensure tree is cleared if no folder selected
-                 setOpenFiles([]);
-                 setActiveFilePath(null);
-                 setFileStates({});
-                 setChatAllProjectFiles([]);
+                 setSelectedFolderPath(null); // Ensure it's null if no folder selected
              }
          } catch (err) {
              setError(`Failed to open folder dialog: ${err.message || 'Unknown error'}`);
              setSelectedFolderPath(null);
          }
     };
-
-    // Effect to fetch directory structure when selectedFolderPath changes
-    useEffect(() => {
-        if (selectedFolderPath) {
-            fetchDirectoryStructure(selectedFolderPath, false);
-        } else {
-            // Clear related state when no folder is selected
-            setDirectoryTree(null);
-            setOpenFiles([]);
-            setActiveFilePath(null);
-            setFileStates({});
-            setError(null);
-            setGlobalFileLoadingError(null);
-            setChatAllProjectFiles([]);
-        }
-    }, [selectedFolderPath, fetchDirectoryStructure]);
-
 
     const handleRefreshNeeded = useCallback(() => {
         if (selectedFolderPath) {
@@ -515,9 +490,9 @@ export default function Home() {
         const tabWrapperBaseClasses = "flex flex-1 flex-col overflow-hidden";
 
         if (!selectedFolderPath) {
-            return <div className={tabWrapperBaseClasses}><HomeTabContent onFolderSelect={handleFolderSelect} /></div>;
+            return <div className={tabWrapperBaseClasses}><HomeTabContent /></div>;
         }
-
+        
         const codeTabContent = () => (
             <CodeEditor
                 openFiles={openFiles}
@@ -527,11 +502,14 @@ export default function Home() {
                 onCloseTab={handleCloseFileTab}
                 onContentChange={handleContentChange}
                 onSaveFile={handleSaveFile}
-                isLoading={isLoadingStructure && !activeFile } // Show loading in editor if structure is loading AND no file is active (or active file is still loading)
-                loadError={fileStates[activeFilePath]?.error || globalFileLoadingError} // Prioritize active file error
+                isLoading={isLoadingStructure} // Loading state for the overall folder structure
+                loadError={globalFileLoadingError} // Global error specific to file operations
                 rootDir={selectedFolderPath}
             />
+
+            
         );
+        
 
         const chatTabContent = () => (
             <ChatSection
@@ -569,7 +547,7 @@ export default function Home() {
                     {automationTabContent()}
                 </div>
                 { !['Code', 'Chat', 'Commit', 'Automation'].includes(activeTab) && selectedFolderPath && (
-                    <div className={tabWrapperBaseClasses}><HomeTabContent onFolderSelect={handleFolderSelect} /></div>
+                    <div className={tabWrapperBaseClasses}><HomeTabContent /></div> // Fallback if folder selected but unknown tab
                  )}
             </>
         );
@@ -587,21 +565,21 @@ export default function Home() {
                                  directoryTree={directoryTree}
                                  selectedFolderPath={selectedFolderPath}
                                  onRefreshNeeded={handleRefreshNeeded}
-                                 onError={handleSetError}
+                                 onError={handleSetError} // For errors from FileBar itself
                                  onFileSelect={handleFileSelect}
-                                 isLoading={isLoadingStructure}
+                                 isLoading={isLoadingStructure} // Pass loading state to FileBar
                              />
                          )}
                         <main className="flex-1 flex flex-col overflow-hidden relative">
-                             {isLoadingStructure && !directoryTree && (!openFiles.length || !activeFilePath) && (
+                             {isLoadingStructure && !directoryTree && ( // Show general loading only if no tree yet
                                  <div className="absolute inset-0 bg-gray-500 bg-opacity-20 flex items-center justify-center z-50">
                                      <div className="text-white bg-black bg-opacity-70 px-4 py-2 rounded flex items-center">
-                                        <FiLoader className="animate-spin mr-2" size={20} />
+                                        {/* <FiLoader className="animate-spin mr-2" size={20} /> */}
                                         Loading Project Structure...
                                      </div>
                                  </div>
                              )}
-                            {error && (
+                            {error && ( // General error display
                                 <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-auto max-w-md z-50 p-3 bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 rounded shadow-lg flex justify-between items-center">
                                     <span>{error}</span>
                                     <button onClick={() => setError(null)} className="ml-3 p-1 rounded-full hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-300">
@@ -609,6 +587,9 @@ export default function Home() {
                                     </button>
                                 </div>
                             )}
+                             {/* Global file loading error is distinct and now passed to CodeEditor, which handles its display for the active file */}
+                             {/* It could also be displayed here if needed for non-active file errors, but CodeEditor handles tab-specific errors. */}
+
                           {renderTabContent()}
                         </main>
                     </div>
