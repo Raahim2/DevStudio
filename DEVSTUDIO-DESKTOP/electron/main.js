@@ -23,11 +23,12 @@ function createWindow() {
         width: 1200,
         height: 800,
         icon: CONSTANTS.ICON_PATH,
+        frame: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
             nodeIntegration: false,
-            webSecurity: false, // Be cautious with this setting
+            webSecurity: false, 
         },
     });
 
@@ -152,10 +153,49 @@ if (!gotTheLock) {
                 fsWatcher = null;
             }
         });
+
+        ipcMain.on('window-minimize', () => {
+        const win = getMainWindow();
+        if (win) win.minimize();
+    });
+
+    ipcMain.on('window-toggle-maximize', () => {
+        const win = getMainWindow();
+        if (win) {
+            if (win.isMaximized()) {
+                win.unmaximize();
+            } else {
+                win.maximize();
+            }
+        }
+    });
+
+    // Expose isMaximized as an invokable handler
+    ipcMain.handle('window-is-maximized', () => {
+        const win = getMainWindow();
+        return win ? win.isMaximized() : false; // Important: return the boolean value
+    });
+
+    ipcMain.on('window-close', () => {
+        const win = getMainWindow();
+        if (win) win.close();
+    });
         // --- End File System Watching IPC Handlers ---
 
 
         createWindow();
+        if (mainWindow) {
+        mainWindow.on('maximize', () => {
+            if (mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                mainWindow.webContents.send('window-maximized-status', true);
+            }
+        });
+        mainWindow.on('unmaximize', () => {
+            if (mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                mainWindow.webContents.send('window-maximized-status', false);
+            }
+        });
+    }
 
         app.on('activate', function () {
             if (BrowserWindow.getAllWindows().length === 0) {

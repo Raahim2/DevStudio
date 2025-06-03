@@ -1,6 +1,20 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+    minimize: () => ipcRenderer.send('window-minimize'),
+    toggleMaximize: () => ipcRenderer.send('window-toggle-maximize'),
+    isMaximized: () => ipcRenderer.invoke('window-is-maximized'), // Use invoke for handlers that return a Promise
+    close: () => ipcRenderer.send('window-close'),
+    // Listen for status changes from main
+    onMaximizedStatusChanged: (callback) => {
+        const handler = (_event, isMaximized) => callback(isMaximized);
+        ipcRenderer.on('window-maximized-status', handler);
+        // Optional: Return a cleanup function to remove the listener
+        return () => {
+            ipcRenderer.removeListener('window-maximized-status', handler);
+        };
+    },
+    
     loginGithub: () => ipcRenderer.send('login-github'),
     onGithubToken: (callback) => {
         const subscription = (_event, value) => callback(value);

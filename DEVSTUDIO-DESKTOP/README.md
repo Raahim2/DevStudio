@@ -10,8 +10,8 @@ NEW Search TAB
 
 ISSUE AI token ✅
 ISSUE GitCommit Error ✅
-ISSUE Proper Dark in image editor
-ISSSUE Delete file lag
+ISSUE Proper Dark in image editor ✅
+ISSSUE Delete file lag ✅
 ISSUE @file tag error ✅
 
 ![DevStudio Logo](LOGO/DevStudioLogo.png)
