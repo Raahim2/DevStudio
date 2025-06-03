@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { FiSend, FiCpu, FiAlertCircle, FiX, FiUser, FiFileText } from 'react-icons/fi';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import CodeBlock from './CodeBlock';
+import CodeBlock from './CodeBlock'; // Assuming CodeBlock.js is in the same directory or path is correct
 
 const callElectronApi = async (funcName, ...args) => {
     if (window.electronAPI && typeof window.electronAPI[funcName] === 'function') {
@@ -121,36 +121,72 @@ const ChatSection = ({
         if (mentionMatch) {
             const startIndex = mentionMatch.index;
             const textAfterCursor = currentValue.substring(cursorPos);
-            const newValue = `${currentValue.substring(0, startIndex)}@${file.name} ${textAfterCursor}`;
+            const newFileNameWithSpace = `${file.name} `;
+            const newValue = `${currentValue.substring(0, startIndex)}@${newFileNameWithSpace}${textAfterCursor}`;
             setInputMessage(newValue);
 
+            let contentToStore;
             try {
-                const fileContent = await callElectronApi('readFileContent', file.path);
-                setMentionedFiles(prev => {
-                    if (!prev.some(f => f.path === file.path)) {
-                        return [...prev, { path: file.path, name: file.name, content: fileContent ?? '' }];
+                const fetchedFileContent = await callElectronApi('readFileContent', file.path);
+                // console.log(`ChatSection: Fetched content for "${file.name}" (${file.path}):`, typeof fetchedFileContent === 'string' ? fetchedFileContent.substring(0,100) + '...' : fetchedFileContent);
+
+                const knownErrorString = "Error: Could not load file content for chat context.";
+
+                if (typeof fetchedFileContent === 'string') {
+                    if (fetchedFileContent === knownErrorString) {
+                        // console.warn(`ChatSection: readFileContent for "${file.name}" returned the specific error string. Using placeholder.`);
+                        contentToStore = `[LINFO: Content load failed for ${file.name} - specific error signature matched]`;
+                    } else if (fetchedFileContent.trim() === '') {
+                        // console.warn(`ChatSection: readFileContent for "${file.name}" was empty. Using placeholder.`);
+                        contentToStore = `[LINFO: File ${file.name} is empty or contains only whitespace]`;
                     }
-                    return prev;
-                });
+                     else {
+                        contentToStore = fetchedFileContent;
+                    }
+                } else if (fetchedFileContent === null || typeof fetchedFileContent === 'undefined') {
+                    // console.warn(`ChatSection: readFileContent for "${file.name}" was null/undefined. Using placeholder.`);
+                    contentToStore = `[LINFO: Content for ${file.name} is null or undefined]`;
+                } else {
+                    // console.warn(`ChatSection: Unexpected content type for "${file.name}". Received:`, fetchedFileContent, `Type: ${typeof fetchedFileContent}. Using placeholder.`);
+                    contentToStore = `[LINFO: Content for ${file.name} has unexpected type: ${typeof fetchedFileContent}]`;
+                }
+
             } catch (error) {
-                console.error(`ChatSection: Failed to fetch content for @mention ${file.name}:`, error);
+                // console.error(`ChatSection: Error fetching content for @mention "${file.name}":`, error);
+                contentToStore = `[LINFO: Error loading content for ${file.name}. Details: ${error.message || 'Unknown error'}]`;
             }
+
+            setMentionedFiles(prev => {
+                const existingFileIndex = prev.findIndex(f => f.path === file.path);
+                const newFileEntry = { path: file.path, name: file.name, content: contentToStore };
+
+                if (existingFileIndex > -1) {
+                    // console.log(`Updating existing mentioned file: ${file.name}`);
+                    const updatedFiles = [...prev];
+                    updatedFiles[existingFileIndex] = newFileEntry;
+                    return updatedFiles;
+                } else {
+                    // console.log(`Adding new mentioned file: ${file.name}`);
+                    return [...prev, newFileEntry];
+                }
+            });
 
             setShowSuggestions(false);
             setMentionQuery('');
             setActiveSuggestionIndex(-1);
 
             setTimeout(() => {
-                textareaRef.current?.focus();
-                const newCursorPos = startIndex + `@${file.name} `.length;
-                textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
                 if (textareaRef.current) {
+                    textareaRef.current.focus();
+                    const newCursorPos = startIndex + `@${newFileNameWithSpace}`.length;
+                    textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
                     textareaRef.current.style.height = 'auto';
                     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
                 }
             }, 0);
         }
-    }, [setInputMessage, setMentionedFiles]);
+    }, [setInputMessage, setMentionedFiles, setShowSuggestions, setMentionQuery, setActiveSuggestionIndex /* removed callElectronApi from deps as it's stable */]);
+
 
     const handleKeyDown = (event) => {
         if (showSuggestions) {
@@ -165,6 +201,7 @@ const ChatSection = ({
                     event.preventDefault();
                     selectSuggestion(suggestions[activeSuggestionIndex]);
                  } else if (event.key === 'Enter' && !event.shiftKey) {
+                      event.preventDefault();
                       handleSendMessageInternal();
                  }
             } else if (event.key === 'Escape') {
@@ -187,7 +224,14 @@ const ChatSection = ({
     };
 
      const handleStopGenerating = useCallback(() => stopGenerating(), [stopGenerating]);
-     const handleClearMentionedFiles = useCallback(() => onClearMentionedFiles(), [onClearMentionedFiles]);
+     const handleClearMentionedFiles = useCallback(() => {
+        if (onClearMentionedFiles) {
+            onClearMentionedFiles();
+        } else {
+            // Fallback if onClearMentionedFiles is not provided, though it should be
+            setMentionedFiles([]);
+        }
+     }, [onClearMentionedFiles, setMentionedFiles]);
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -212,7 +256,7 @@ const ChatSection = ({
              textarea.style.height = 'auto';
              textarea.style.height = `${textarea.scrollHeight}px`;
          }
-     }, []);
+     }, [inputMessage]);
 
     const markdownComponents = useMemo(() => ({
          pre: ({ node, children, ...props }) => {
@@ -258,7 +302,7 @@ const ChatSection = ({
         tr: ({ node, ...props }) => <tr className="[.dark_&]:hover:bg-neutral-700/30" {...props} />,
         th: ({ node, ...props }) => <th className="px-2 py-1 text-left text-xs font-medium text-neutral-600 [.dark_&]:text-neutral-300 uppercase tracking-wider border border-neutral-300 [.dark_&]:border-neutral-600" {...props} />,
         td: ({ node, ...props }) => <td className="px-2 py-1 text-xs text-neutral-800 [.dark_&]:text-neutral-200 border border-neutral-300 [.dark_&]:border-neutral-600" {...props} />,
-    }), [selectedFile, handleSaveCodeBlock]);
+    }), [selectedFile?.path, handleSaveCodeBlock]); // Added selectedFile.path to dependencies
 
     const isInteractionDisabled = isApiKeyMissing || isSending || !selectedFolderPath;
     const displayError = geminiError;
@@ -304,6 +348,8 @@ const ChatSection = ({
                              </div>
                              <div className={`p-3 rounded-xl shadow-sm ${message.role === 'user' ? 'bg-blue-100 [.dark_&]:bg-blue-900/60 text-neutral-900 [.dark_&]:text-white rounded-br-none' : 'bg-neutral-100 [.dark_&]:bg-neutral-800 text-neutral-900 [.dark_&]:text-white rounded-bl-none'}`}>
                                 <div className="text-sm font-normal leading-relaxed chat-content">
+                                    {/* The message.content is rendered here. If it's malformed for user messages,
+                                        it's because the parent component set it that way in chatHistory. */}
                                     <ReactMarkdown
                                         components={markdownComponents}
                                         remarkPlugins={[remarkGfm]}
@@ -351,7 +397,7 @@ const ChatSection = ({
                  )}
 
                  {mentionedFiles.length > 0 && (
-                    <div className="[.dark_&]:bg-neutral-700 mb-2 px-2 flex flex-wrap items-center justify-between gap-y-1 text-xs text-neutral-600 [.dark_&]:text-neutral-400 bg-neutral-100 [.dark_&]:bg-neutral-700/60 rounded-md py-1.5">
+                    <div className="mb-2 px-2 flex flex-wrap items-center justify-between gap-y-1 text-xs text-neutral-600 [.dark_&]:text-neutral-400 bg-neutral-100 [.dark_&]:bg-neutral-700/60 rounded-md py-1.5">
                         <div className="flex items-center flex-wrap gap-1 overflow-hidden pl-1">
                              <FiFileText className="mr-1.5 flex-shrink-0 text-purple-500 [.dark_&]:text-purple-400" size={14}/>
                              <span className="font-medium mr-1 flex-shrink-0">Mentioned:</span>
@@ -359,7 +405,7 @@ const ChatSection = ({
                                 <span
                                     key={file.path}
                                     className="truncate font-mono text-neutral-700 [.dark_&]:text-neutral-300 bg-purple-100 [.dark_&]:bg-purple-900/50 px-1.5 py-0.5 rounded"
-                                    title={`${file.path}`}
+                                    title={`${file.path} ${file.content && file.content.startsWith('[LINFO:') ? `(${file.content})` : '' }`}
                                 >
                                     @{file.name}
                                 </span>

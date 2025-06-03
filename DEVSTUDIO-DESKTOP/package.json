@@ -1,6 +1,6 @@
 {
   "name": "devstudio",
-  "version": "0.2.1",
+  "version": "2.2.1",
   "private": true,
   "main": "electron/main.js",
   "scripts": {

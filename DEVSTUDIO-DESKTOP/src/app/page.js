@@ -180,30 +180,51 @@ export default function Home() {
         setChatMentionedFiles([]);
     }, []);
 
-    const handleChatSendMessage = useCallback(async (messageToSend, filesAttached) => {
-        const trimmedMessage = messageToSend.trim();
-        if (!trimmedMessage || isChatSending || isGeminiApiKeyMissing) return;
+    const handleChatSendMessage = useCallback(async (messageTypedByUser, filesAttachedByChatSection) => {
+        const trimmedMessage = messageTypedByUser.trim();
 
-        let promptToSend = trimmedMessage;
-        let messageForHistory = trimmedMessage;
-
-        if (filesAttached.length > 0) {
-            let fileContextPrefix = '';
-            for (const file of filesAttached) {
-                const mentionRegex = new RegExp(`@${escapeRegex(file.name)}\\b`, 'g');
-                promptToSend = promptToSend.replace(mentionRegex, file.name);
-                const fileState = fileStates[file.path];
-                const content = fileState && fileState.content !== null && fileState.content !== undefined 
-                                ? fileState.content 
-                                : "Error: Could not load file content for chat context."; // Provide a fallback
-                fileContextPrefix += `File: ${file.name} (Path: ${file.path})\n\`\`\`\n${content}\n\`\`\`\n\n`;
-            }
-            promptToSend = `${fileContextPrefix}User Query:\n${promptToSend}`;
+        if ((!trimmedMessage && filesAttachedByChatSection.length === 0) || isChatSending || isGeminiApiKeyMissing) {
+            return;
         }
-        sendChatMessageHook(promptToSend, messageForHistory);
+
+        const messageForHistoryDisplay = trimmedMessage || (filesAttachedByChatSection.length > 0 ? `Attached ${filesAttachedByChatSection.length} file(s)` : "");
+
+        let promptForAI = trimmedMessage;
+
+        if (filesAttachedByChatSection.length > 0) {
+            let fileContextForAI = "\n\n--- Attached Files Context ---";
+            let pathSep = '/'; // Default
+            if (window.electronAPI?.pathSep) {
+                try { pathSep = await callElectronApi('pathSep'); } catch(e) { console.warn("Failed to get pathSep for chat message"); }
+            }
+
+            for (const file of filesAttachedByChatSection) {
+                const contentForAI = file.content || `[LINFO: Content for ${file.name} was not available or empty.]`;
+                let displayPath = file.path;
+                if (selectedFolderPath && file.path.startsWith(selectedFolderPath + pathSep)) {
+                    displayPath = file.path.substring(selectedFolderPath.length + pathSep.length);
+                }
+
+                fileContextForAI += `\n[File: ${file.name} (Path: ${displayPath})]\n`;
+                if (contentForAI.startsWith('[LINFO:')) {
+                    fileContextForAI += `${contentForAI}\n`;
+                } else {
+                    const extension = file.name.split('.').pop()?.toLowerCase() || 'text';
+                    fileContextForAI += `\`\`\`${extension}\n${contentForAI}\n\`\`\`\n`;
+                }
+            }
+            fileContextForAI += "--- End Attached Files Context ---\nUser Query:\n";
+            promptForAI = fileContextForAI + promptForAI;
+        }
+
+        // Assuming useGeminiChat's sendMessage hook:
+        // - First argument: the full prompt for the AI.
+        // - Second argument: the message content to display for the user in chatHistory.
+        sendChatMessageHook(promptForAI, messageForHistoryDisplay);
+
         setChatInputMessage('');
         setChatMentionedFiles([]);
-    }, [isChatSending, isGeminiApiKeyMissing, sendChatMessageHook, fileStates]);
+    }, [isChatSending, isGeminiApiKeyMissing, sendChatMessageHook, selectedFolderPath]);
 
 
     const fetchDirectoryStructure = useCallback(async (folderPath, isExternalRefresh = false) => {
@@ -289,7 +310,6 @@ export default function Home() {
             if (refreshDebounceTimeoutRef.current) clearTimeout(refreshDebounceTimeoutRef.current);
         };
     }, [selectedFolderPath, fetchDirectoryStructure]);
-
 
     const fetchFileContent = useCallback(async (filePath, fileName) => {
         setFileStates(prev => ({

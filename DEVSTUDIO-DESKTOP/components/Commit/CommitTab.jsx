@@ -59,6 +59,8 @@ const CommitTab = ({ selectedFolderPath, accessToken, activeTab  , onGithubLogin
     const [showRepoSetup, setShowRepoSetup] = useState(false);
     const [userRepos, setUserRepos] = useState([]);
     const [isInitializing, setIsInitializing] = useState(false); // For init/link/create repo actions
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    
 
     const remoteName = 'origin'; // Assuming 'origin'
     const defaultBranchName = 'main'; // Assume 'main' as the default
@@ -138,6 +140,19 @@ const CommitTab = ({ selectedFolderPath, accessToken, activeTab  , onGithubLogin
     }, [showRepoSetup, setupError]); // Include setupError to prevent clearing it if fetch succeeds while setup error is shown
 
 
+    useEffect(() => {
+            const checkDarkMode = () => setIsDarkMode(document.documentElement.classList.contains('dark'));
+            checkDarkMode();
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleChange = () => checkDarkMode();
+            mediaQuery.addEventListener('change', handleChange);
+            const observer = new MutationObserver(checkDarkMode);
+            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+            return () => {
+                mediaQuery.removeEventListener('change', handleChange);
+                observer.disconnect();
+            };
+        }, []);
 
     // Effect to trigger initial status fetch and on path/tab changes
     useEffect(() => {
@@ -766,6 +781,7 @@ const CommitTab = ({ selectedFolderPath, accessToken, activeTab  , onGithubLogin
                         diffContent={diffContent}
                         hasChanges={hasAnyChanges}
                         isRepo={isRepo}
+                        isDark={isDarkMode}
                     />
                     <CommitMessageArea
                         commitMessage={commitMessage}
