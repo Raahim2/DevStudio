@@ -7,6 +7,7 @@ const DiffViewerPanel = ({
     diffContent, // { oldCode, newCode }
     hasChanges, // boolean: Are there any files listed in staged/unstaged?
     isRepo, // boolean
+    isDark
 }) => {
     const hasDiff = diffContent.oldCode || diffContent.newCode;
     const isLoadingError = diffContent.oldCode?.startsWith('Error loading diff:');
@@ -25,7 +26,7 @@ const DiffViewerPanel = ({
                         splitView={false}
                         hideLineNumbers={false}
                         showDiffOnly={false}
-                        useDarkTheme={false}
+                        useDarkTheme={isDark}
                         key={selectedFileForDiff.path + '-' + selectedFileForDiff.isStaged}
                     />
                  ) : (

@@ -2,13 +2,7 @@ import React from 'react';
 import { FiCpu, FiDatabase, FiSettings } from 'react-icons/fi';
 
 const Bottombar = () => {
-  // VS Code [.dark_&] Theme Inspired Colors for Status Bar:
-  // Background: [.dark_&] gray, often slightly lighter than editor (e.g., neutral-800)
-  // Border: Subtle, [.dark_&]er than background or very light (e.g., neutral-700 or neutral-600)
-  // Text (general): Light gray (e.g., neutral-400 or neutral-300)
-  // Text/Icons (interactive/highlighted): Brighter light gray/white (e.g., neutral-200, neutral-100)
-  // Badges/Segments: Can be subtly different background or just colored text.
-
+  
   return (
     <div className="
       h-8 flex items-center justify-between px-4 text-xs shrink-0
@@ -19,7 +13,7 @@ const Bottombar = () => {
       <div className="flex items-center space-x-1">
         <span className="font-mono text-purple-600 [.dark_&]:text-purple-400">👾</span>
         {/* Text color will be inherited: text-gray-700 [.dark_&]:text-neutral-400 */}
-        <span>DevStudio 0.0.9 (Build 1)</span>
+        <span>DevStudio 2.2.1 (Build 1)</span>
       </div>
 
       {/* Center - User Modes */}
