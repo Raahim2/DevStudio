@@ -50,7 +50,7 @@ const HammerIcon = () => (
 );
 
 const DownloadDevStudio = () => {
-  const currentVersion = "0.1.1";
+  const currentVersion = "2.1.1";
 
   return (
     <div className="w-full bg-white dark:bg-black py-16 md:py-24 px-4 sm:px-6 lg:px-8 text-center transition-colors">
@@ -67,7 +67,7 @@ const DownloadDevStudio = () => {
 
         {/* Download Button */}
         <button
-          onClick={() => window.location.href = 'https://github.com/Raahim2/DevStudio/releases/download/DevStudio/DevStudio-0.2.1.exe'} 
+          onClick={() => window.location.href = 'https://github.com/Raahim2/DevStudio/releases/download/DevStudiov2/DevStudio.Setup.2.2.1.exe'} 
           className="inline-flex items-center justify-center px-5 py-3 md:px-6 md:py-3.5 rounded-lg
                      bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700
                      text-white font-semibold text-base md:text-lg shadow-lg
