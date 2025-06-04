@@ -149,14 +149,14 @@ export default function HomePage() {
               className="block dark:hidden"
               animationStyle="from-center"
               videoSrc="https://res.cloudinary.com/defyovyob/video/upload/v1749037446/k3hzh2qvapbrcrhx1ouv.mp4"
-              thumbnailSrc="https://startup-template-sage.vercel.app/hero-light.png"
+              thumbnailSrc="https://devstudio-ai.vercel.app/DevStudioLight.png"
               thumbnailAlt="Hero Video"
             />
             <Video
               className="hidden dark:block"
               animationStyle="from-center"
               videoSrc="https://res.cloudinary.com/defyovyob/video/upload/v1749037446/k3hzh2qvapbrcrhx1ouv.mp4"
-              thumbnailSrc="https://startup-template-sage.vercel.app/hero-dark.png"
+              thumbnailSrc="https://devstudio-ai.vercel.app/DevStudioDark.png"
               thumbnailAlt="Hero Video"
             />
           </div>
