@@ -16,7 +16,6 @@ const Bottombar = () => {
         <span>DevStudio 2.2.1 (Build 1)</span>
       </div>
 
-      {/* Center - User Modes */}
       <div className="flex items-center space-x-1">
         <button className="
           px-2 py-0.5 rounded transition-colors duration-150
