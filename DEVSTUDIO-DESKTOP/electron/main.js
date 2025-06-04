@@ -1,8 +1,8 @@
 const { app, BrowserWindow, shell, ipcMain, Menu, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
-const chokidar = require('chokidar'); // Import chokidar
-const fs = require('fs'); // For fs.existsSync and fs.statSync in watcher setup
+const chokidar = require('chokidar');
+const fs = require('fs');
 
 const CONSTANTS = require('./constants');
 
@@ -12,7 +12,24 @@ const { setupGitHandlers } = require('./ipcs/gitHandlers');
 const { setupGitHubApiHandlers } = require('./ipcs/githubApiHandlers');
 
 let mainWindow;
-let fsWatcher = null; // Variable to hold the chokidar instance
+let fsWatcher = null;
+let filePathToOpenOnReady = null;
+
+if (app.isPackaged) {
+    if (process.argv.length >= 2) {
+        const openArg = process.argv[1];
+        if (openArg && !openArg.startsWith('--') && fs.existsSync(openArg)) {
+            filePathToOpenOnReady = openArg;
+        }
+    }
+} else {
+    if (process.argv.length >= 3) {
+        const openArg = process.argv[2];
+        if (openArg && !openArg.startsWith('--') && fs.existsSync(openArg)) {
+            filePathToOpenOnReady = openArg;
+        }
+    }
+}
 
 function getMainWindow() {
     return mainWindow;
@@ -28,17 +45,17 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
             nodeIntegration: false,
-            webSecurity: false, 
+            webSecurity: false,
         },
     });
 
     const isProd = app.isPackaged;
 
     if (isProd) {
-        mainWindow.loadFile(CONSTANTS.INDEX_HTML_PATH).catch(err => console.error('[Main Process] Failed to load prod index.html:', err));
+        mainWindow.loadFile(CONSTANTS.INDEX_HTML_PATH).catch(err => console.error(err));
         mainWindow.setMenu(null);
     } else {
-        mainWindow.loadURL(CONSTANTS.LOCAL_HOST_URL).catch(err => console.error('[Main Process] Failed to load localhost:', err));
+        mainWindow.loadURL(CONSTANTS.LOCAL_HOST_URL).catch(err => console.error(err));
         const menu = Menu.buildFromTemplate([
             {
                 label: 'DevStudio',
@@ -46,19 +63,23 @@ function createWindow() {
             }
         ]);
         Menu.setApplicationMenu(menu);
-        // mainWindow.setMenu(null);
-
-        // mainWindow.webContents.openDevTools(); // Optional: Open dev tools on start
     }
+
+    mainWindow.webContents.on('did-finish-load', () => {
+        if (filePathToOpenOnReady) {
+            mainWindow.webContents.send('app:open-file-or-folder', filePathToOpenOnReady);
+            filePathToOpenOnReady = null;
+        }
+    });
 
     mainWindow.on('closed', function () {
         mainWindow = null;
         if (fsWatcher) {
-            fsWatcher.close().catch(err => console.error('[Main Watcher] Error closing watcher on window close:', err));
+            fsWatcher.close().catch(err => console.error(err));
             fsWatcher = null;
         }
     });
-    return mainWindow; // Return the window instance
+    return mainWindow;
 }
 
 if (process.defaultApp) {
@@ -75,12 +96,26 @@ if (!gotTheLock) {
     app.quit();
 } else {
     app.on('second-instance', (event, commandLine, workingDirectory) => {
+        let pathToOpenFromSecondInstance = null;
+        const argIndex = app.isPackaged ? 1 : 2;
+
+        if (commandLine.length > argIndex) {
+            const potentialPath = commandLine[argIndex];
+            if (potentialPath && !potentialPath.startsWith('--') && !potentialPath.startsWith(`${CONSTANTS.APP_PROTOCOL}://`) && fs.existsSync(potentialPath)) {
+                pathToOpenFromSecondInstance = potentialPath;
+            }
+        }
+
         if (mainWindow) {
             if (mainWindow.isMinimized()) mainWindow.restore();
             mainWindow.focus();
+            if (pathToOpenFromSecondInstance) {
+                 mainWindow.webContents.send('app:open-file-or-folder', pathToOpenFromSecondInstance);
+            }
         }
-        const protocolUrl = commandLine.pop();
-        if (protocolUrl && protocolUrl.startsWith(`${CONSTANTS.APP_PROTOCOL}://`)) {
+
+        const protocolUrl = commandLine.find(arg => arg.startsWith(`${CONSTANTS.APP_PROTOCOL}://`));
+        if (protocolUrl) {
             handleAuthCallback(protocolUrl);
         }
     });
@@ -95,23 +130,19 @@ if (!gotTheLock) {
             shell.openExternal(CONSTANTS.WEBSITE_LOGIN_URL);
         });
 
-        // --- File System Watching IPC Handlers ---
         ipcMain.on('app:watch-folder', (event, folderPath) => {
             if (fsWatcher) {
-                console.log('[Main Watcher] Closing previous watcher.');
-                fsWatcher.close().catch(err => console.error('[Main Watcher] Error closing previous watcher:', err));
+                fsWatcher.close().catch(err => console.error(err));
                 fsWatcher = null;
             }
 
             if (!folderPath || !fs.existsSync(folderPath) || !fs.statSync(folderPath).isDirectory()) {
-                console.log(`[Main Watcher] Invalid or non-existent folder path provided: ${folderPath}`);
                 return;
             }
 
-            console.log(`[Main Watcher] Starting to watch: ${folderPath}`);
             try {
                 fsWatcher = chokidar.watch(folderPath, {
-                    ignored: /(^|[\/\\])\..*$/, // Ignore dotfiles/folders (e.g., .git, .DS_Store)
+                    ignored: /(^|[\/\\])\..*$/,
                     persistent: true,
                     ignoreInitial: true,
                     depth: undefined,
@@ -124,7 +155,6 @@ if (!gotTheLock) {
                 const notifyRenderer = (eventType, changedPath) => {
                     const currentWindow = getMainWindow();
                     if (currentWindow && currentWindow.webContents && !currentWindow.webContents.isDestroyed()) {
-                        console.log(`[Main Watcher] Event: ${eventType}, Path: ${changedPath}. Notifying renderer.`);
                         currentWindow.webContents.send('app:file-system-changed', {
                             eventType,
                             path: changedPath,
@@ -138,64 +168,60 @@ if (!gotTheLock) {
                     .on('addDir', dirPath => notifyRenderer('addDir', dirPath))
                     .on('unlink', filePath => notifyRenderer('unlink', filePath))
                     .on('unlinkDir', dirPath => notifyRenderer('unlinkDir', dirPath))
-                    .on('error', error => console.error(`[Main Watcher] Error: ${error}`))
-                    .on('ready', () => console.log('[Main Watcher] Initial scan complete. Ready for changes.'));
+                    .on('error', error => console.error(error))
+                    .on('ready', () => {});
 
             } catch (error) {
-                console.error(`[Main Watcher] Failed to initialize chokidar for ${folderPath}:`, error);
+                console.error(error);
             }
         });
 
         ipcMain.on('app:stop-watching-folder', () => {
             if (fsWatcher) {
-                console.log('[Main Watcher] Stopping watcher.');
-                fsWatcher.close().catch(err => console.error('[Main Watcher] Error closing watcher:', err));
+                fsWatcher.close().catch(err => console.error(err));
                 fsWatcher = null;
             }
         });
 
         ipcMain.on('window-minimize', () => {
-        const win = getMainWindow();
-        if (win) win.minimize();
-    });
+            const win = getMainWindow();
+            if (win) win.minimize();
+        });
 
-    ipcMain.on('window-toggle-maximize', () => {
-        const win = getMainWindow();
-        if (win) {
-            if (win.isMaximized()) {
-                win.unmaximize();
-            } else {
-                win.maximize();
+        ipcMain.on('window-toggle-maximize', () => {
+            const win = getMainWindow();
+            if (win) {
+                if (win.isMaximized()) {
+                    win.unmaximize();
+                } else {
+                    win.maximize();
+                }
             }
-        }
-    });
+        });
 
-    // Expose isMaximized as an invokable handler
-    ipcMain.handle('window-is-maximized', () => {
-        const win = getMainWindow();
-        return win ? win.isMaximized() : false; // Important: return the boolean value
-    });
+        ipcMain.handle('window-is-maximized', () => {
+            const win = getMainWindow();
+            return win ? win.isMaximized() : false;
+        });
 
-    ipcMain.on('window-close', () => {
-        const win = getMainWindow();
-        if (win) win.close();
-    });
-        // --- End File System Watching IPC Handlers ---
-
+        ipcMain.on('window-close', () => {
+            const win = getMainWindow();
+            if (win) win.close();
+        });
 
         createWindow();
         if (mainWindow) {
-        mainWindow.on('maximize', () => {
-            if (mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
-                mainWindow.webContents.send('window-maximized-status', true);
-            }
-        });
-        mainWindow.on('unmaximize', () => {
-            if (mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
-                mainWindow.webContents.send('window-maximized-status', false);
-            }
-        });
-    }
+            mainWindow.on('maximize', () => {
+                if (mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                    mainWindow.webContents.send('window-maximized-status', true);
+                }
+            });
+            mainWindow.on('unmaximize', () => {
+                if (mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                    mainWindow.webContents.send('window-maximized-status', false);
+                }
+            });
+        }
 
         app.on('activate', function () {
             if (BrowserWindow.getAllWindows().length === 0) {
@@ -225,14 +251,14 @@ function handleAuthCallback(protocolUrl) {
             }
         }
     } catch (e) {
-        console.error('[Main Process] Failed to parse protocol URL:', protocolUrl, e);
+        console.error(e);
     }
 }
 
 app.on('window-all-closed', function () {
     cleanupTerminalProcess();
-    if (fsWatcher) { // Ensure watcher is closed here too
-        fsWatcher.close().catch(err => console.error('[Main Watcher] Error closing watcher on all windows closed:', err));
+    if (fsWatcher) {
+        fsWatcher.close().catch(err => console.error(err));
         fsWatcher = null;
     }
     if (process.platform !== 'darwin') {
@@ -242,8 +268,8 @@ app.on('window-all-closed', function () {
 
 app.on('will-quit', () => {
     cleanupTerminalProcess();
-    if (fsWatcher) { // And here, for good measure
-        fsWatcher.close().catch(err => console.error('[Main Watcher] Error closing watcher on will-quit:', err));
+    if (fsWatcher) {
+        fsWatcher.close().catch(err => console.error(err));
         fsWatcher = null;
     }
 });

@@ -5,11 +5,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     toggleMaximize: () => ipcRenderer.send('window-toggle-maximize'),
     isMaximized: () => ipcRenderer.invoke('window-is-maximized'), // Use invoke for handlers that return a Promise
     close: () => ipcRenderer.send('window-close'),
-    // Listen for status changes from main
+    onAppOpenFileOrFolder: (callback) => ipcRenderer.on('app:open-file-or-folder', (_event, filePath) => callback(filePath)),
+
     onMaximizedStatusChanged: (callback) => {
         const handler = (_event, isMaximized) => callback(isMaximized);
         ipcRenderer.on('window-maximized-status', handler);
-        // Optional: Return a cleanup function to remove the listener
         return () => {
             ipcRenderer.removeListener('window-maximized-status', handler);
         };

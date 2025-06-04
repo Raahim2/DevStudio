@@ -1,18 +1,4 @@
 # DevStudio - AI-Powered GitHub-Based Code Editing Platform
-WHATS NEW:
-NEW Terminal Dark ✅
-NEW Display Audio/Vidoo/PDF etc ✅
-NEW welcome template 
-NEW TopBar Drak
-NEW Ctrl click link
-NEW diff view in Ctrl K
-NEW Search TAB
-
-ISSUE AI token ✅
-ISSUE GitCommit Error ✅
-ISSUE Proper Dark in image editor ✅
-ISSSUE Delete file lag ✅
-ISSUE @file tag error ✅
 
 ![DevStudio Logo](LOGO/DevStudioLogo.png)
 
@@ -65,5 +51,6 @@ Check out the demo video to see DevStudio in action: [Watch Demo](https://res.cl
 
 Happy Coding!  
 **The DevStudio Team**
+
 
 
