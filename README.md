@@ -35,9 +35,9 @@
 
 
 ## ✨ Features in Action
-<img src="DEVSTUDIO-DESKTOP/assets/Demo1.png" alt="DevStudio Logo" width="400" /> &nbsp;&nbsp;&nbsp;
-<img src="DEVSTUDIO-DESKTOP/assets/Demo2.png" alt="DevStudio Logo" width="400"/> &nbsp;&nbsp;&nbsp;
-<img src="DEVSTUDIO-DESKTOP/assets/Demo3.png" alt="DevStudio Logo" width="400"/> &nbsp;&nbsp;&nbsp;
+<img src="DEVSTUDIO-DESKTOP/assets/Demo1.png" alt="DevStudio Logo" /> 
+<img src="DEVSTUDIO-DESKTOP/assets/Demo2.png" alt="DevStudio Logo" /> 
+<img src="DEVSTUDIO-DESKTOP/assets/Demo3.png" alt="DevStudio Logo" /> 
 <img src="DEVSTUDIO-DESKTOP/assets/Demo4.png" alt="DevStudio Logo" width="400"/>
 
 
