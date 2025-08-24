@@ -1,73 +1,122 @@
-# GitHub-Based Code Editor with Automation
+<div align="center">
 
-This is a web-based project designed to provide a GitHub-integrated code editing experience with automation features.
+  <!-- You can create a simple logo and place it here -->
+  <img src="DEVSTUDIO-DESKTOP/assets/icon.png" alt="DevStudio Logo" width="150"/>
 
-## Features
+  <h1>DevStudio Website</h1>
 
-- **GitHub Integration**: Seamlessly connect to your GitHub repositories for real-time code editing.
-- **Automation Tools**: Automate repetitive tasks like formatting, linting, and deployment.
-- **Live Preview**: View changes in real-time as you edit your code.
-- **Collaboration**: Work with your team using built-in collaboration tools.
+  <p>
+    <strong>Code at the Speed of Thought.</strong>
+  </p>
+  <p>
+    An intelligent, AI-powered code editor built with Electron and Monaco to supercharge your development workflow.
+  </p>
 
-## Getting Started
+  <!-- Badges -->
+  <p>
+    <a href="https://github.com/Raahim2/DevStudio/releases"><img src="https://img.shields.io/github/v/release/Raahim2/DevStudio?style=for-the-badge&logo=github&color=34D399" alt="Latest Release"/></a>
+    <a href="https://github.com/Raahim2/DevStudio/actions/workflows/main.yml"><img src="https://img.shields.io/github/actions/workflow/status/Raahim2/DevStudio/main.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white" alt="Build Status"/></a>
+    <a href="https://github.com/Raahim2/DevStudio/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Raahim2/DevStudio?style=for-the-badge&color=f472b6" alt="License"/></a>
+    <a href="https://github.com/Raahim2/DevStudio/stargazers"><img src="https://img.shields.io/github/stars/Raahim2/DevStudio?style=for-the-badge&logo=github&color=FBBF24" alt="GitHub Stars"/></a>
+  </p>
+  
+</div>
 
-To run the project locally, follow these steps:
+##  Tech Stack
 
-1. Clone the repository:
+[![Electron.js](https://img.shields.io/badge/Electron.js-47848F?style=flat&logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/)
+[![Visual Studio Code](https://img.shields.io/badge/VSCode-0078D4?style=flat&logo=visual-studio-code&logoColor=white)](https://code.visualstudio.com/)
 
-    ```bash
-    git clone https://github.com/your-username/your-repo.git
-    cd your-repo
-    ```
 
-2. Install dependencies:
+## ✨ Features in Action
 
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
+<img src="../DEVSTUDIO-DESKTOP/assets/Landing.png" alt="DevStudio Logo"  /> 
 
-3. Start the development server:
 
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to access the application.
 
-## Usage
-
-- **Editing Files**: Navigate to the desired file in your repository and start editing. Changes are automatically saved and synced with GitHub.
-- **Automation**: Configure automation scripts in the settings panel to streamline your workflow.
-- **Deployment**: Deploy your changes directly to your hosting platform with a single click.
-
-## Learn More
-
-To learn more about the project and its features, check out the following resources:
-
-- [Documentation](https://github.com/your-username/your-repo/wiki) - Detailed guides and tutorials.
-- [GitHub API](https://docs.github.com/en/rest) - Learn about the GitHub API used in this project.
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Submit a pull request with a detailed description of your changes.
-
-## Deploy on Vercel
-
-The easiest way to deploy this project is to use the [Vercel Platform](https://vercel.com). Follow these steps:
-
-1. Connect your GitHub repository to Vercel.
-2. Configure your deployment settings.
-3. Deploy your application with a single click.
-
-For more details, refer to the [Vercel Deployment Documentation](https://vercel.com/docs).
+Check out the demo video to see DevStudio in action: [Watch Demo](https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4)
 
 ---
-Feel free to ask questions or provide feedback!
+
+
+Built on the same core editor that powers VS Code (Monaco Editor), DevStudio provides a familiar, blazing-fast editing experience, enhanced with a native layer of artificial intelligence.
+
+
+
+
+
+
+
+## 🚀 Core Features
+
+-   🧠 **Intelligent AI Assistance**:
+    -   **Context-Aware Code Completion**: Get smart suggestions that understand the context of your project.
+    -   **Code Generation**: Describe what you want to build in plain English and let the AI generate boilerplate code for you.
+    -   **Debugging & Explanation**: Stuck on a bug or complex function? Ask DevStudio to explain the code or suggest a fix.
+
+-   ⚛️ **Powered by Monaco Editor**:
+    -   Enjoy the world-class editing experience you already love from VS Code, including lightning-fast performance, syntax highlighting for dozens of languages, and IntelliSense.
+
+-   📦 **Built-in GitHub Integration**:
+    -   Clone repositories, view diffs, stage changes, write commit messages, and push your work—all without ever leaving the editor.
+
+-   🎨 **Sleek & Customizable UI**:
+    -   A clean, minimalist interface built with Next.js and Tailwind CSS that gets out of your way.
+    -   Customize themes, fonts, and layouts to create your perfect coding environment.
+
+-   🌐 **Cross-Platform**:
+    -   Built with Electron, DevStudio runs smoothly on Windows, macOS, and Linux.
+
+## 🛠️ Tech Stack
+
+DevStudio is built with a modern and powerful stack:
+
+| Technology         | Description                                        |
+| ------------------ | -------------------------------------------------- |
+| ⚡ **Electron**   | For building the cross-platform desktop application. |
+| ⚛️ **Next.js**     | For the UI and frontend logic.                     |
+| ✏️ **Monaco Editor** | The core text editor engine from VS Code.          |
+| 💨 **Tailwind CSS** | For utility-first styling and rapid UI development.|
+| 🍃 **MongoDB**     | For storing user settings and project data.        |
+| 🟢 **Node.js**     | For the backend logic and server-side operations.  |
+
+## 📦 Installation
+
+Get up and running with DevStudio in minutes.
+
+1.  **Download the Latest Release**:
+    - Head over to the [**Releases Page**](https://github.com/Raahim2/DevStudio/releases) and download the appropriate installer for your operating system (`.exe` for Windows, `.dmg` for macOS, `.AppImage` or `.deb` for Linux).
+
+2.  **Install & Launch**:
+    - Run the installer and launch DevStudio. You're ready to code!
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+
+1.  **Fork the Project**
+2.  **Create your Feature Branch** (`git checkout -b feature/AmazingFeature`)
+3.  **Commit your Changes** (`git commit -m 'Add some AmazingFeature'`)
+4.  **Push to the Branch** (`git push origin feature/AmazingFeature`)
+5.  **Open a Pull Request**
+
+Don't forget to give the project a star! Thanks again!
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by the DevStudio Team</p>
+</div>

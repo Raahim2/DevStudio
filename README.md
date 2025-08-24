@@ -3,7 +3,7 @@
   <!-- You can create a simple logo and place it here -->
   <img src="DEVSTUDIO-DESKTOP/assets/icon.png" alt="DevStudio Logo" width="150"/>
 
-  <h1>DevStudio</h1>
+  <h1>DevStudio Code Editor</h1>
 
   <p>
     <strong>Code at the Speed of Thought.</strong>
@@ -22,16 +22,33 @@
   
 </div>
 
+##  Tech Stack
+
+[![Electron.js](https://img.shields.io/badge/Electron.js-47848F?style=flat&logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white)](https://vercel.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/)
+[![Visual Studio Code](https://img.shields.io/badge/VSCode-0078D4?style=flat&logo=visual-studio-code&logoColor=white)](https://code.visualstudio.com/)
+
+
+## ✨ Features in Action
+<img src="DEVSTUDIO-DESKTOP/assets/Demo1.png" alt="DevStudio Logo" width="400" /> &nbsp;&nbsp;&nbsp;
+<img src="DEVSTUDIO-DESKTOP/assets/Demo2.png" alt="DevStudio Logo" width="400"/> &nbsp;&nbsp;&nbsp;
+<img src="DEVSTUDIO-DESKTOP/assets/Demo3.png" alt="DevStudio Logo" width="400"/> &nbsp;&nbsp;&nbsp;
+<img src="DEVSTUDIO-DESKTOP/assets/Demo4.png" alt="DevStudio Logo" width="400"/>
+
+
+
+Check out the demo video to see DevStudio in action: [Watch Demo](https://res.cloudinary.com/dtykfxrql/video/upload/v1744085710/demo_q1fsxu.mp4)
+
 ---
 
 
 Built on the same core editor that powers VS Code (Monaco Editor), DevStudio provides a familiar, blazing-fast editing experience, enhanced with a native layer of artificial intelligence.
 
-## ✨ Features in Action
-
-A picture is worth a thousand words, but a GIF is worth a million.
-
-*A GIF showcasing the AI code completion, GitHub integration, and the sleek UI of DevStudio.*
 
 
 
