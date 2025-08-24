@@ -10,6 +10,7 @@ import HomeTabContent from '../../components/Main/HomeTabContent';
 import CodeEditor from '../../components/Code/CodeEditor'; // Ensure this path is correct
 import AutomationTab from '../../components/Automate/Automation';
 import CommitTab from '../../components/Commit/CommitTab'
+import TitleBar from '../../components/Main/TitleBar';
 import { FiX } from 'react-icons/fi';
 import { useGeminiChat } from '../../hooks/useGeminiChat';
 
@@ -555,8 +556,11 @@ export default function Home() {
 
     return (
         <div className="flex flex-col h-screen bg-white dark:bg-gray-900 text-black dark:text-white overflow-hidden">
+            <TitleBar  />
+
             <div className="flex flex-1 overflow-hidden">
                 <TabSelectorSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
                 <div className="flex flex-1 flex-col overflow-hidden">
                     <Topbar onFolderSelect={handleFolderSelect} selectedFolderPath={selectedFolderPath} />
                     <div className="flex flex-1 overflow-hidden">

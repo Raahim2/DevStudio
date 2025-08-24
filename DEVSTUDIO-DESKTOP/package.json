@@ -1,3 +1,4 @@
+
 {
   "name": "devstudio",
   "version": "2.2.1",
@@ -52,6 +53,7 @@
   "build": {
     "appId": "com.raahim2.devstudio",
     "productName": "DevStudio",
+    "copyright": "Copyright © 2025 DevStudio",
     "files": [
       "electron/**/*",
       "out/**/*",
@@ -75,3 +77,4 @@
     }
   }
 }
+

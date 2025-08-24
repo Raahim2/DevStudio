@@ -7,7 +7,7 @@ const Bottombar = () => {
     <div className="
       h-8 flex items-center justify-between px-4 text-xs shrink-0
       bg-gray-100 border-t border-gray-200 text-gray-700 /* Light mode: light gray bg, default text */
-      [.dark_&]:bg-neutral-800 [.dark_&]:border-t [.dark_&]:border-neutral-700 [.dark_&]:text-neutral-400 /* [.dark_&] mode: VSCode-like status bar */
+      [.dark_&]:bg-neutral-900 [.dark_&]:border-t [.dark_&]:border-neutral-700 [.dark_&]:text-neutral-400 /* [.dark_&] mode: VSCode-like status bar */
     ">
       {/* Left Side - Version Info */}
       <div className="flex items-center space-x-1">
@@ -16,7 +16,6 @@ const Bottombar = () => {
         <span>DevStudio 2.2.1 (Build 1)</span>
       </div>
 
-      {/* Center - User Modes */}
       <div className="flex items-center space-x-1">
         <button className="
           px-2 py-0.5 rounded transition-colors duration-150

@@ -1,15 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import "tailwindcss";
+@import "tailwindcss"; /* Assuming you have Tailwind CSS properly set up */
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Light Theme Scrollbar Colors (VS Code Light-ish) */
+  --scrollbar-track-bg-light: #f3f3f3; /* Slightly off-white */
+  --scrollbar-thumb-bg-light: #c1c1c1; /* Medium grey */
+  --scrollbar-thumb-bg-hover-light: #a8a8a8; /* Darker grey on hover */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #0a0a0a; /* Your very dark background */
     --foreground: #ededed;
+
+    /* Dark Theme Scrollbar Colors (VS Code Dark-ish) */
+    /* Adjust these to match your exact --background if needed for a more integrated look */
+    --scrollbar-track-bg-dark: #252526; /* VS Code dark editor background color */
+    --scrollbar-thumb-bg-dark: #424242; /* A common VS Code scrollbar thumb color */
+    --scrollbar-thumb-bg-hover-dark: #555555; /* Slightly lighter on hover */
   }
 }
 
@@ -18,3 +29,80 @@ body {
   color: var(--foreground);
   font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
+
+/* --- Global Scrollbar Styles --- */
+
+/* For WebKit/Blink based browsers (Chrome, Edge, Safari, Opera) */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar { /* Target all scrollable elements */
+  width: 10px;  /* VS Code scrollbar width is often around 10-14px */
+  height: 10px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg-light); /* Default to light theme track */
+  /* No border-radius for a more VS Code-like flat look */
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-bg-light); /* Default to light theme thumb */
+  border-radius: 5px; /* VS Code thumbs often have a slight rounding */
+  /* No border around the thumb to keep it clean like VS Code */
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-bg-hover-light);
+}
+
+/* Hide scrollbar buttons (arrows) as VS Code often doesn't show them prominently */
+html::-webkit-scrollbar-button,
+body::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* For Firefox */
+html, body, * {
+  scrollbar-width: thin; /* 'thin' is a good match for VS Code's slim scrollbars */
+  scrollbar-color: var(--scrollbar-thumb-bg-light) var(--scrollbar-track-bg-light); /* thumb track */
+}
+
+
+/* --- Dark Mode Scrollbar Overrides --- */
+@media (prefers-color-scheme: dark) {
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track-bg-dark);
+  }
+
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb,
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb-bg-dark);
+  }
+
+  html::-webkit-scrollbar-thumb:hover,
+  body::-webkit-scrollbar-thumb:hover,
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-bg-hover-dark);
+  }
+
+  /* Firefox dark mode scrollbar colors */
+  html, body, * {
+    /* Check if this inherits correctly from :root in dark mode.
+       If not, you might need to re-declare vars or use direct colors.
+       However, CSS variables defined in @media (prefers-color-scheme: dark) :root {}
+       should be accessible globally when that media query is active.
+    */
+    scrollbar-color: var(--scrollbar-thumb-bg-dark) var(--scrollbar-track-bg-dark);
+  }
+}
+
