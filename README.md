@@ -38,7 +38,7 @@
 <img src="DEVSTUDIO-DESKTOP/assets/Demo1.png" alt="DevStudio Logo" /> 
 <img src="DEVSTUDIO-DESKTOP/assets/Demo2.png" alt="DevStudio Logo" /> 
 <img src="DEVSTUDIO-DESKTOP/assets/Demo3.png" alt="DevStudio Logo" /> 
-<img src="DEVSTUDIO-DESKTOP/assets/Demo4.png" alt="DevStudio Logo" width="400"/>
+<img src="DEVSTUDIO-DESKTOP/assets/Demo4.png" alt="DevStudio Logo" />
 
 
 
