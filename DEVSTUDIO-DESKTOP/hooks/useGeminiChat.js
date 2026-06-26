@@ -25,7 +25,20 @@ async function fetchAndDecryptApiKey() {
   }
 }
 
+async function fetchModelName() {
+  try {
+    const res = await fetch("https://devstudio-ai.vercel.app/api/model");
+    if (!res.ok) throw new Error("Failed to fetch model");
+    const data = await res.json();
+    return data.model;
+  } catch (e) {
+    console.error("Failed to fetch model name, using fallback:", e);
+    return "gemini-2.5-flash"; // Fallback in case the API request fails
+  }
+}
+
 const API_KEY =  await fetchAndDecryptApiKey();
+const MODEL_NAME = await fetchModelName();
 
 export const useGeminiChat = () => {
     const [chatHistory, setChatHistory] = useState([]);
@@ -71,7 +84,7 @@ export const useGeminiChat = () => {
 
         try {
             const model = genAI.getGenerativeModel({
-                model: "gemini-2.5-flash",
+                model: MODEL_NAME,
                  safetySettings: [ // Basic safety settings
                     { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
                     { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
