@@ -23,7 +23,7 @@ async function fetchAndDecryptApiKey() {
 }
 
 const API_KEY = await fetchAndDecryptApiKey();
-const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest';
+const API_ENDPOINT_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash';
 const API_GENERATE_CONTENT_URL = `${API_ENDPOINT_BASE}:generateContent`; // Non-streaming endpoint
 
 const safetySettings = [

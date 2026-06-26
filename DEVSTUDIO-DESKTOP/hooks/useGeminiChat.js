@@ -71,7 +71,7 @@ export const useGeminiChat = () => {
 
         try {
             const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
+                model: "gemini-2.5-flash",
                  safetySettings: [ // Basic safety settings
                     { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
                     { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
