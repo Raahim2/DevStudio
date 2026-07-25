@@ -6,3 +6,6 @@ DEVSTUDIO-DESKTOP/node_modules
 dist
 .next
 Animation
+
+model.safetensors
+adapter_model.safetensors
